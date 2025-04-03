@@ -424,6 +424,134 @@
                     </div>
                 </div>
             </div>
+            <div class="quant">
+                <div class="quant__inner">
+                    <div class="quant__nav-modes">
+                        <div class="quant__nav-mode-wrapper">
+                            <input id="quant__nav-mode--narrow" class="quant__nav-mode" type="radio" name="nav-mode" value="narrow" checked="checked">
+                            <label class="quant__nav-mode-label" for="quant__nav-mode--narrow">Static</label>
+                        </div>
+                        <div class="quant__nav-mode-wrapper">
+                            <input id="quant__nav-mode--free" class="quant__nav-mode" type="radio" name="nav-mode" value="free">
+                            <label class="quant__nav-mode-label" for="quant__nav-mode--free">Free nav</label>
+                        </div>
+                    </div>
+                    <div class="quant__intro">
+                        <div class="quant__intro-header">
+                            <h2 class="quant__intro-title">Shader quant</h2>
+                            <button class="button-icon quant__intro--minimize" title="Hide Instruction"></button>
+                        </div>
+                        <div class="quant__intro-description">
+                            Welcome to your personal shader playground, where you can write your own and see how it looks in a cinematic 3D environment. <br>
+                            <br>
+                            Few things to know:<br>
+                            <ul>
+                                <li>The shader editing structure matches the same as the one in Shadertoy.com with the same predefined uniforms such as iResolution, iTime, etc. Except no texture, audio and framebuffer supported </li>
+                                <li>
+                                    There are other features including 2.5D through the alpha channel of fragColor. <button class="button-inline button__instructions" data-id="more-features" aria-label="more features">See here for more details </button>
+                                </li>
+                                <li>
+                                    We don’t host your shaders, your shaders are automatically saved in your local machine through the localStorage API. You got 3 shader slots for localStorage. If you want to save and share your CineShader, please <button class="button-inline button__instructions" data-id="save-and-share" aria-label="Open the save and share instructions">follow these instructions </button>
+                                </li>
+                                <li>WebGL 2 by default and WebGL 1 fallback if the user’s browser doesn’t support WebGL 2</li>
+                                <li>
+                                    Need a reminder of the supported uniforms? <button class="button-inline button__instructions" data-id="shader-syntax" aria-label="Shader syntax">Here you go </button>
+                                </li>
+                                <li>
+                                    If you want to convert your existing shaders from Shadertoy into a compatible shader, <button class="button-inline button__instructions" data-id="convert-your-shader" aria-label="Convert your shader">see here </button>
+                                </li>
+                                <li>
+                                    Open your shadertoy in CineShader: <button class="button-default button__instructions" data-id="test-shadertoy" aria-label="test-shadertoy">ENTER HERE </button>
+                                </li>
+                            </ul>
+                            <br>
+                            We encourage you to add the <a class="button-inline" href="https://www.shadertoy.com/results?query=tag%3Dcineshader" target="_blank">cineshader</a>
+                            tag if you save your shaders on Shadertoy. 
+                        </div>
+                    </div>
+                    <div class="quant__main">
+                        <ul class="quant__tabs">
+                            <li class="quant__tab is-active" title="Slot 1">1</li>
+                            <li class="quant__tab" title="Slot 2">2</li>
+                            <li class="quant__tab" title="Slot 3">3</li>
+                        </ul>
+                        <div class="quant__buttons">
+                            <div class="quant__buttons-line">
+                                <div class="group group--template">
+                                    <span class="group__name">Template:</span>
+                                    <div class="select-wrapper">
+                                        <select class="select-default"></select>
+                                    </div>
+                                    <button class="button-default button__load" aria-label="Load template">New</button>
+                                </div>
+                                <div class="group group--model">
+                                    <span class="group__name">Model:</span>
+                                    <div class="select-wrapper">
+                                        <select class="select-default">
+                                            <option value="person">Person</option>
+                                            <option value="car">Car</option>
+                                            <option value="nothing">Nothing</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="quant__buttons-line">
+                                <div class="group group--title">
+                                    <span class="group__name">Title:</span>
+                                    <input class="group__input-text" type="text" value="My Shader">
+                                </div>
+                                <div class="group group--description">
+                                    <span class="group__name">Description:</span>
+                                    <input class="group__input-text" type="text" value="Lorem ipsum dolor">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="shader-quant">
+                            <div id="shader-quant-cm"></div>
+                            <div class="quant__controls">
+                                <div class="quant__controls-left">
+                                    <button class="button-default button__preview" aria-label="Preview shader">Preview</button>
+                                    <span class="button-separator"></span>
+                                    <button class="button-default button__compile" aria-label="Compile shader" title="Alt + Enter">Compile</button>
+                                    <button class="button-icon button__restart" aria-label="Restart shader time" title="Alt + Down">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.9 26" xml:space="preserve">
+                                            <path d="M16.9 0v26L4.5 13 16.9 0M0 0h4.5v26H0z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="button-icon button__pause" aria-label="Pause shader" title="Alt + Up">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 12.4 26" xml:space="preserve">
+                                            <path class="play" d="M0 26V0l12.4 13L0 26"/>
+                                            <path class="pause" d="M0 0h4.5v26H0zM7.9 0h4.5v26H7.9z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="quant__controls-right">
+                                    <span class="time">164.7</span>
+                                    <span class="fps">
+                                        <span class="fps-value">59</span>
+                                        fps
+                                    </span>
+                                    <span class="button-separator"></span>
+                                    <button class="button-icon button__screenshot" aria-label="Screenshot" title="HD snapshot">
+                                        <svg version="1.1" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="m4.8 9c0 1.8 1.5 3.3 3.3 3.3s3.3-1.5 3.3-3.3-1.6-3.2-3.4-3.2-3.2 1.4-3.2 3.2zm10.2-5.5h-3.5c-0.3-1-0.5-2-1.5-2h-4c-1 0-1.3 1-1.5 2h-3.5c-0.6 0-1 0.4-1 1v9c0 0.6 0.4 1 1 1h14c0.6 0 1-0.4 1-1v-9c0-0.6-0.4-1-1-1zm-7 9.9c-2.5 0-4.4-2-4.4-4.4s2-4.4 4.4-4.4c2.5 0 4.4 2 4.4 4.4s-1.9 4.4-4.4 4.4zm7-6.9h-2v-1h2v1z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="button-separator"></span>
+                                    <div class="quant__controls-view-quality select-wrapper">
+                                        <select class="select-default select-quality" title="View Quality">
+                                            <option value="0">Minimal</option>
+                                            <option value="1">Low</option>
+                                            <option value="2">Mid (Interlace)</option>
+                                            <option value="3">Full</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="preloader">
                 <div id="preloader-context">
                     <h2 id="preloader-title">CineShader</h2>
