@@ -46,7 +46,7 @@
 .form-container input:focus {
     background: #51585b;
     outline: none;
-    border: 1px solid #008ecf;
+    border: 1px solid #00ffad;
 }
 
 /* button {
@@ -84,7 +84,7 @@
 }
 
 .form-container button:hover {
-    background: #00ffad;
+    background: #051015;
 }
 
 button:active {
