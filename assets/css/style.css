@@ -44,7 +44,7 @@
 }
 
 .form-container input:focus {
-    border: 1px solid #051015;
+    border: 1px solid #00ffad;
     outline: none;
 }
 
@@ -71,8 +71,8 @@
 
 .form-container button {
     border-radius: 20px;
-    border: 1px solid #051015;
-    background: #00ffad;
+    border: 1px solid #00ffad;
+    background: #051015;
     color: #fff;
     font-size: 12px;
     font-weight: bold;
@@ -153,7 +153,7 @@ button.ghost:hover {
 }
 
 .overlay {
-  background: linear-gradient(to right, #51585b, #051015);
+  background: linear-gradient(to right, #051015, #051015);
   color: #fff;
   position: relative;
   left: -100%;
