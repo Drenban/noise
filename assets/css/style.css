@@ -335,35 +335,3 @@ button.ghost:focus {
         transform: translateY(0);
     }
 }
-
-.form-container .fas.fa-eye,
-.form-container .fas.fa-eye-slash {
-    color: #c3c3c3 !important;
-    cursor: pointer;
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-.form-container .fas.fa-eye:hover,
-.form-container .fas.fa-eye-slash:hover {
-    color: #fff;
-}
-
-.form-container input[type="password"] {
-    background: #51585b;
-    border: none;
-    padding: 12px 45px 12px 15px;
-    margin: 8px 0;
-    width: 100%;
-    color: #fff;
-    position: relative;
-}
-
-.form-container .password-wrapper {
-    position: relative;
-    width: 100%;
-}
