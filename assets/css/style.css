@@ -336,23 +336,34 @@ button.ghost:focus {
     }
 }
 
-/* 针对可能的显示密码按钮 */
-.form-container .show-password,
-.form-container .toggle-password,
-.form-container .password-toggle {
-    color: #c3c3c3 !important; /* 强制灰白色 */
-    background: transparent; /* 确保背景不干扰 */
-    border: none; /* 移除边框 */
-    cursor: pointer; /* 保持手型 */
+.form-container .fas.fa-eye,
+.form-container .fas.fa-eye-slash {
+    color: #c3c3c3 !important;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    transition: color 0.3s ease;
 }
 
-/* 如果是图标 */
-.form-container .fa-eye,
-.form-container .fa-eye-slash {
-    color: #c3c3c3 !important; /* 针对 Font Awesome 图标 */
+.form-container .fas.fa-eye:hover,
+.form-container .fas.fa-eye-slash:hover {
+    color: #fff;
 }
 
-/* 如果是内联元素 */
-.form-container [class*="password"] {
-    color: #c3c3c3 !important; /* 匹配含 "password" 的类名 */
+.form-container input[type="password"] {
+    background: #51585b;
+    border: none;
+    padding: 12px 45px 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+    color: #fff;
+    position: relative;
+}
+
+.form-container .password-wrapper {
+    position: relative;
+    width: 100%;
 }
