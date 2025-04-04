@@ -44,7 +44,7 @@
 }
 
 .form-container input:focus {
-    border: 1px solid #00ffad;
+    border: 1px solid #051015;
     outline: none;
 }
 
@@ -63,8 +63,8 @@
 
 .form-container button {
     border-radius: 20px;
-    border: 1px solid #00ffad;
-    background: #051015;
+    border: 1px solid #051015;
+    background: #00ffad;
     color: #fff;
     font-size: 12px;
     font-weight: bold;
