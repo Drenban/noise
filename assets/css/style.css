@@ -43,24 +43,12 @@
     color: #fff;
 }
 
+.form-container input[type=text]:focus,
 .form-container input:focus {
     background: #51585b;
     outline: none;
     border: 1px solid #00ffad;
 }
-
-/* button {
-  border-radius: 20px;
-  border: 1px solid #008ecf;
-  background: #008ecf;
-  color: #fff;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 12px 45px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: transform 80ms ease-in;
-} */
 
 .button {
   user-select: none;
