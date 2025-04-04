@@ -35,12 +35,12 @@
 }
 
 .form-container input {
-  background: #051015;
+  background: #51585b;
   border: none;
   padding: 12px 15px;
   margin: 8px 0;
   width: 100%;
-  color: #51585b;
+  color: #051015;
 }
 
 .form-container input:focus {
@@ -72,7 +72,7 @@
 .form-container button {
     border-radius: 20px;
     border: 1px solid #00ffad;
-    background: #051015;
+    background: #51585b;
     color: #fff;
     font-size: 12px;
     font-weight: bold;
@@ -83,7 +83,7 @@
 }
 
 .form-container button:hover {
-    background: #51585b;
+    background: #00ffad;
 }
 
 button:active {
