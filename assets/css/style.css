@@ -111,26 +111,38 @@ button.ghost {
     background: transparent;
     border: 1px solid #fff;
     color: #fff;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: bold;
     padding: 12px 45px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    transition: background-color 0.3s ease, border-color 0.3s ease, transform 80ms ease-in;
+    cursor: pointer;
+    box-shadow: none;
+    transition: all 0.3s ease;
 }
 
 button.ghost:hover {
     background: #51585b;
-    border-color: #51585b;
-    color: #fff;
+    border-color: #c3c3c3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
 }
 
-.overlay-panel button.ghost {
-    background: transparent;
-    border-color: #fff;
-    color: #fff;
+button.ghost:active {
+    background: #51585b;
+    border-color: #51585b;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transform: scale(0.95) translateY(0);
 }
+
+button.ghost:focus {
+    outline: none;
+    border-color: #00ffad;
+    box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
+}
+
+.overlay-panel button.ghost {}
 
 .auth-container.right-panel-active .overlay-panel button.ghost {
     background: transparent;
