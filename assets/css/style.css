@@ -61,6 +61,14 @@
   transition: transform 80ms ease-in;
 } */
 
+.button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
 .form-container button {
     border-radius: 20px;
     border: 1px solid #051015;
