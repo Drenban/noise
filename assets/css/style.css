@@ -13,9 +13,9 @@
 .auth-container {
     position: absolute;
     top: 0;
-    left: 50px;
-    width: calc(100% - 50px);
-    height: calc(100% - 50px);
+    left: 45px;
+    width: calc(100% - 45px);
+    height: calc(100% - 55px);
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2), 0 10px 10px rgba(0, 0, 0, 0.2);
