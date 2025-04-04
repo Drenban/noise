@@ -12,6 +12,37 @@
 }
 
 .auth-container {
+    font-family: "Noto Sans SC", "Roboto", sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+    padding: 10px 0;
+    box-sizing: border-box;
+}
+
+.auth-container * {
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+}
+
+.auth-container h1,
+.auth-container h2,
+.auth-container h3 {
+    margin: 0.5em 0;
+}
+
+.auth-container p {
+    margin: 0.75em 0;
+}
+
+.auth-container button,
+.auth-container input {
+    font-family: inherit;
+}
+
+.auth-container {
     position: absolute;
     top: 0;
     left: 45px;
