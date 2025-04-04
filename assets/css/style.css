@@ -87,19 +87,19 @@
     transform: translateY(-2px);
 }
 
-.form-container input[type=text]:focus,
-.form-container input:focus {
+.form-container input[type="text"]:focus,
+.form-container input:not([type="password"]):focus {
     background: #051015;
     border: 1px solid #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
-    outline: none;    
+    outline: none;
 }
 
 .form-container input[type="password"]:focus {
     background: transparent;
     background-image: linear-gradient(to right, rgba(255, 59, 59, 0.8) 50%, transparent 50%);
     background-size: 200% 100%;
-    background-position: 0 100%;
+    background-position: 100% 0;
     animation: fillBackground 0.6s ease forwards;
     border: 1px solid #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
@@ -108,7 +108,7 @@
 
 @keyframes fillBackground {
     from {
-        background-position: 0 100%;
+        background-position: 100% 0;
     }
     to {
         background-position: 0 0;
