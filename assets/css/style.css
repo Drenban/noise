@@ -144,11 +144,11 @@ button.ghost:focus {
 
 .overlay-panel button.ghost {}
 
-.auth-container.right-panel-active .overlay-panel button.ghost {
+/* .auth-container.right-panel-active .overlay-panel button.ghost {
     background: transparent;
     border-color: #fff;
     color: #fff;
-}
+} */
 
 .form-container {
   position: absolute;
