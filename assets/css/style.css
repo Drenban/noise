@@ -1,9 +1,9 @@
-#shader-quant.auth-active {
+#shader-quant.is-active {
     position: relative;
     height: 400px;
 }
 
-#shader-quant-cm.auth-active {
+#shader-quant-cm.is-active {
     position: relative;
     width: 100%;
     height: calc(100% - 40px);
