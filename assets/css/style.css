@@ -2,6 +2,7 @@
     position: relative;
     height: 400px;
     border: 1px solid #51585b;
+    background: #051015;
 }
 
 #shader-quant-cm.is-active {
