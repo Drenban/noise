@@ -11,7 +11,9 @@
     overflow: hidden;
 }
 
-.auth-container {
+.auth-container,
+.search-header,
+.search-body {
     font-family: "Noto Sans SC", "Roboto", sans-serif;
     font-size: 18px;
     letter-spacing: 0.5px;
