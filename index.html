@@ -513,53 +513,8 @@
                             </div>
                         </div>
                         <div id="shader-quant">
-                            <div id="shader-quant-cm"></div>
-                                <div class="auth-container" id="auth-container">
-                                    <div class="form-container sign-in-container">
-                                        <form action="#" onsubmit="handleSignIn(event)">
-                                            <h1>登录</h1>
-                                            <ul class="social">
-                                                <li><a href="#"><i class="fab fa-twitter"></i></a></li>                                                
-                                                <li><a href="#"><i class="fab fa-github"></i></a></li>                                                
-                                                <li><a href="#"><i class="fab fa-linkedin"></i></a></li>                                            
-                                            </ul>
-                                            <span>或使用您的帐户</span>
-                                            <input type="email" placeholder="邮箱" required />
-                                            <input type="password" placeholder="密码" required />
-                                            <a href="#">忘记密码？</a>
-                                            <button type="submit">登录</button>
-                                        </form>
-                                    </div>
-                                    <div class="form-container sign-up-container">
-                                        <form action="#" onsubmit="handleSignUp(event)">
-                                            <h1>创建账户</h1>
-                                            <ul class="social">
-                                                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                                <li><a href="#"><i class="fab fa-github"></i></a></li>
-                                                <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
-                                            </ul>
-                                            <span>或使用您的电子邮件注册</span>
-                                            <input type="text" placeholder="用户名" required />
-                                            <input type="email" placeholder="邮箱" required />
-                                            <input type="password" placeholder="密码" required />
-                                            <button type="submit">注册</button>
-                                        </form>
-                                    </div>
-                                    <div class="overlay-container">
-                                        <div class="overlay">
-                                            <div class="overlay-panel overlay-left">
-                                                <h1>欢迎回来！</h1>
-                                                <p>请使用您的个人信息登录</p>
-                                                <button class="ghost" id="signIn">登录</button>
-                                            </div>
-                                            <div class="overlay-panel overlay-right">
-                                                <h1>您好，朋友！</h1>
-                                                <p>输入个人信息，开始旅程</p>
-                                                <button class="ghost" id="signUp">注册</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- 搜索页面 -->
+                            <div id="search-page" class="search-page">
                                 <div class="search-header">
                                     <button class="history-btn">历史</button>
                                     <button class="logout-btn" onclick="handleLogout()">退出</button>
@@ -584,6 +539,57 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        
+                            <!-- 登录/注册页面 -->
+                            <div id="shader-quant-cm"></div>
+                            <div class="auth-container" id="auth-container">
+                                <div class="form-container sign-in-container">
+                                    <form action="#" onsubmit="handleSignIn(event)">
+                                        <h1>登录</h1>
+                                        <ul class="social">
+                                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-github"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                                        </ul>
+                                        <span>或使用您的帐户</span>
+                                        <input type="email" placeholder="邮箱" required />
+                                        <input type="password" placeholder="密码" required />
+                                        <a href="#">忘记密码？</a>
+                                        <button type="submit">登录</button>
+                                    </form>
+                                </div>
+                                <div class="form-container sign-up-container">
+                                    <form action="#" onsubmit="handleSignUp(event)">
+                                        <h1>创建账户</h1>
+                                        <ul class="social">
+                                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-github"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                                        </ul>
+                                        <span>或使用您的电子邮件注册</span>
+                                        <input type="text" placeholder="用户名" required />
+                                        <input type="email" placeholder="邮箱" required />
+                                        <input type="password" placeholder="密码" required />
+                                        <button type="submit">注册</button>
+                                    </form>
+                                </div>
+                                <div class="overlay-container">
+                                    <div class="overlay">
+                                        <div class="overlay-panel overlay-left">
+                                            <h1>欢迎回来！</h1>
+                                            <p>请使用您的个人信息登录</p>
+                                            <button class="ghost" id="signIn">登录</button>
+                                        </div>
+                                        <div class="overlay-panel overlay-right">
+                                            <h1>您好，朋友！</h1>
+                                            <p>输入个人信息，开始旅程</p>
+                                            <button class="ghost" id="signUp">注册</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             <div class="quant__controls">
                                 <div class="quant__controls-left">
                                     <button class="button-default button__preview" aria-label="Preview shader">Preview</button>
