@@ -382,10 +382,12 @@ button.ghost:focus {
     height: 100%;
     background: #051015;
     color: #fff;
+    pointer-events: none;
 }
 
 #search-page.is-active {
     display: block;
+    pointer-events: auto;
 }
 
 /* 搜索头部 */
