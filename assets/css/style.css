@@ -1,14 +1,13 @@
 #shader-quant.is-active {
-    position: relative;
-    height: 100%;
+    width: 100%;
     border: 1px solid #51585b;
+    -webkit-transition: border-color .3s linear;
+    -o-transition: border-color .3s linear;
+    transition: border-color .3s linear
 }
 
-#shader-quant-cm.is-active {
-    position: relative;
-    width: 100%;
-/*     height: calc(100% - 40px); */
-    overflow: hidden;
+#shader-quant-cm {
+    height: calc(100% - 40px)
 }
 
 .auth-container,
