@@ -12,8 +12,7 @@
 }
 
 .auth-container,
-.search-header,
-.search-body {
+#search-page, {
     font-family: "Noto Sans SC", "Roboto", sans-serif;
     font-size: 18px;
     letter-spacing: 0.5px;
@@ -358,9 +357,25 @@ button.ghost:focus {
     }
 }
 
+/* 外层容器 */
+#shader-quant.is-active {
+    position: relative;
+    height: 400px;
+    border: 1px solid #51585b;
+    background: #051015;
+}
+
+/* 内层容器 */
+#shader-quant-cm.is-active {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 40px); /* 与原样式一致 */
+    overflow: hidden;
+}
+
 /* 搜索页面默认隐藏 */
 #search-page {
-    display: none; /* 默认隐藏 */
+    display: none;
     position: absolute;
     top: 0;
     left: 0;
@@ -368,15 +383,13 @@ button.ghost:focus {
     height: 100%;
     background: #051015;
     color: #fff;
-    font-family: "Noto Sans SC", "Roboto", sans-serif;
 }
 
-/* 激活时显示 */
 #search-page.is-active {
     display: block;
 }
 
-/* 头部 */
+/* 搜索头部 */
 .search-header {
     height: 40px;
     width: 100%;
@@ -403,7 +416,7 @@ button.ghost:focus {
     color: #051015;
 }
 
-/* 主体 */
+/* 搜索主体 */
 .search-body {
     height: calc(100% - 40px);
     display: flex;
@@ -509,9 +522,4 @@ button.ghost:focus {
 .search-bar .random-btn:hover {
     background: #c3c3c3;
     color: #051015;
-}
-
-/* 未使用 #shader-quant-cm */
-#shader-quant-cm {
-    display: none;
 }
