@@ -355,3 +355,142 @@ button.ghost:focus {
         transform: translateY(0);
     }
 }
+
+/* 头部：40px 高，左右对齐 */
+.search-header {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* 左右对齐 */
+    align-items: center;
+    padding: 0 20px;
+    background: #51585b; /* 灰色背景 */
+    border-bottom: 1px solid #51585b;
+}
+
+.search-header button {
+    background: transparent;
+    border: 1px solid #00ffad; /* 绿色边框 */
+    color: #fff;
+    padding: 6px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.search-header button:hover {
+    background: #00ffad; /* 悬浮绿色 */
+    color: #051015;
+}
+
+/* 主体：左右分割 */
+.search-body {
+    height: calc(100% - 40px); /* 减去头部高度 */
+    display: flex;
+}
+
+/* 左侧历史记录：30% */
+.search-history {
+    width: 30%;
+    padding: 20px;
+    border-right: 1px solid #51585b;
+    overflow-y: auto; /* 支持滚动 */
+}
+
+.search-history h3 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.search-history ul {
+    list-style: none;
+    padding: 0;
+}
+
+.search-history li {
+    padding: 5px 0;
+    color: #c3c3c3; /* 灰白色文字 */
+    cursor: pointer;
+}
+
+.search-history li:hover {
+    color: #00ffad; /* 悬浮绿色 */
+}
+
+/* 右侧搜索内容：70% */
+.search-content {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* 搜索结果：水平垂直居中 */
+.search-results {
+    flex: 1; /* 占满剩余空间 */
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    overflow-y: auto; /* 支持滚动 */
+}
+
+.search-results ul {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.search-results li {
+    padding: 10px 0;
+    color: #fff;
+    font-size: 14px;
+}
+
+/* 搜索栏：固定底部 */
+.search-bar {
+    position: absolute;
+    bottom: 20px; /* 底部间距 */
+    width: 100%;
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center;
+    gap: 10px; /* 按钮间距 */
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.search-bar input {
+    background: #51585b;
+    border: 1px solid #51585b;
+    padding: 10px 15px;
+    width: 50%; /* 搜索框宽度 */
+    color: #fff;
+    border-radius: 4px;
+    outline: none;
+}
+
+.search-bar input:focus {
+    border: 1px solid #00ffad;
+    box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
+}
+
+.search-bar button {
+    background: #51585b;
+    border: 1px solid #00ffad;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.search-bar .search-btn:hover {
+    background: #00ffad;
+    color: #051015;
+}
+
+.search-bar .random-btn:hover {
+    background: #c3c3c3; /* 随机按钮悬浮灰白色 */
+    color: #051015;
+}
