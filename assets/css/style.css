@@ -6,7 +6,7 @@
     transition: border-color .3s linear
 }
 
-#shader-quant-cm {
+#shader-quant-cm.is-active {
     height: calc(100% - 40px)
 }
 
