@@ -28,8 +28,8 @@ function handleSignIn(event) {
 
     if (email === 'user@example.com' && password === 'password') {
         storage.setItem("isLoggedIn", "true");
-        container.style.display = 'none'; // 隐藏登录页面
-        searchPage.classList.add('is-active'); // 显示搜索页面
+        container.style.display = 'none';
+        searchPage.classList.add('is-active');
         alert('登录成功！');
     } else {
         alert('邮箱或密码错误');
