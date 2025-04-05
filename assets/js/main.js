@@ -4,10 +4,7 @@ const signInButton = document.getElementById('signIn');
 const container = document.getElementById('auth-container');
 const searchPage = document.getElementById('search-page');
 
-// 使用 sessionStorage，确保刷新后退出
 const storage = sessionStorage;
-
-// 检查登录状态
 const isLoggedIn = () => storage.getItem("isLoggedIn") === "true";
 
 // 切换到注册表单
