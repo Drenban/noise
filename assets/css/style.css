@@ -8,7 +8,7 @@
     position: relative;
     width: 100%;
     height: calc(100% - 40px);
-    overflow: visible;
+    overflow: hidden;
 }
 
 .auth-container,
@@ -44,7 +44,7 @@
 }
 
 .auth-container {
-    position: absolute; /* relative; */
+    position: relative; /* absolute; */
     top: 0;
     left: 45px;
     width: calc(100% - 45px);
