@@ -44,11 +44,13 @@
 }
 
 .auth-container {
-    position: absolute;
-    top: 0;
-    left: 45px;
-    width: calc(100% - 45px);
-    height: calc(100% - 55px);
+    position: relative; /* absolute; */
+    /* top: 0; */
+    /* left: 45px; */
+    /* width: calc(100% - 45px); */
+    /* height: calc(100% - 55px); */
+    width: 100%;
+    height: 100%;
     background: #051015;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2), 0 10px 10px rgba(0, 0, 0, 0.2);
     overflow: hidden;
@@ -67,12 +69,14 @@
 
 .form-container input {
     background: #051015;
-    border: 1px solid #51585b;
+    border: none; /* 1px solid #51585b; */
     padding: 12px 15px;
     margin: 8px 0;
     width: 100%;
     color: #fff;
     border-radius: 4px;
+    position: relative;
+    pointer-events: auto;
     transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
 }
 
@@ -211,13 +215,13 @@ button.ghost:focus {
 .sign-in-container {
   left: 0;
   width: 50%;
-  z-index: 2;
+  /* z-index: 2; */
 }
 
 .sign-up-container {
   left: 0;
   width: 50%;
-  z-index: 1;
+  /* z-index: 1; */
   opacity: 0;
 }
 
@@ -271,7 +275,7 @@ button.ghost:focus {
 .auth-container.right-panel-active .sign-up-container {
   transform: translateX(100%);
   opacity: 1;
-  z-index: 5;
+  /* z-index: 5; */
 }
 
 .auth-container.right-panel-active .overlay {
