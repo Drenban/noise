@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
             storage.setItem("isLoggedIn", "true");
             container.classList.add('hidden');
             searchPage.classList.add('is-active');
-            alert('登录成功！');
+            alert('登录成功，欢迎回来！');
         } else {
-            alert('邮箱或密码错误');
+            alert('登录失败，请检查邮箱或密码是否正确。');
         }
     }
 
@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.querySelector('.sign-up-container input[type="password"]').value;
 
         if (name && email && password) {
-            alert('注册成功！请使用您的账户登录');
+            alert('注册成功，欢迎加入！请使用您的账户信息登录以继续。');
             container.classList.remove('right-panel-active');
         } else {
-            alert('请填写所有字段');
+            alert('请完整填写所有必填项。');
         }
     }
 
@@ -87,5 +87,5 @@ window.handleLogout = function() {
     container.classList.remove('hidden');
     searchPage.classList.remove('is-active');
     searchHistory.classList.remove('visible');
-    alert('已退出登录！');
+    alert('您已成功退出登录，期待您的再次访问。');
 };
