@@ -16,15 +16,6 @@
     background: #051015;
 }
 
-/* 示例底层内容（若有） */
-.quant-controls {
-    width: 100%;
-    height: 100%;
-    color: #fff;
-    text-align: center;
-    padding: 20px;
-}
-
 /* 搜索页面 */
 #search-page {
     display: none; /* 默认隐藏 */
