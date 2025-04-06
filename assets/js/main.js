@@ -7,13 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyButton = document.querySelector('.history-btn');
     const searchHistory = document.querySelector('.search-history');
     const logoutButton = document.querySelector('.logout-btn');
+    const signInForm = document.querySelector('.sign-in-container form');
 
     const storage = sessionStorage;
     const isLoggedIn = () => storage.getItem("isLoggedIn") === "true";
 
     // 检查 DOM 元素
-    if (!container || !searchPage || !logoutButton) {
-        console.error("DOM elements not found:", { container, searchPage, logoutButton });
+    if (!container || !searchPage || !logoutButton || !signInForm) {
+        console.error("DOM elements not found:", { container, searchPage, logoutButton, signInForm });
         return;
     }
 
@@ -25,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 退出按钮功能
     logoutButton.addEventListener('click', handleLogout);
 
+    // 登录表单提交事件
+    signInForm.addEventListener('submit', handleSignIn);
+
     signUpButton.addEventListener('click', () => {
         container.classList.add('right-panel-active');
     });
@@ -34,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function handleSignIn(event) {
-        event.preventDefault();
+        event.preventDefault(); // 阻止默认提交
         const email = document.querySelector('.sign-in-container input[type="email"]').value;
         const password = document.querySelector('.sign-in-container input[type="password"]').value;
 
