@@ -22,8 +22,8 @@ function handleSignIn(event) {
 
     if (email === 'user@example.com' && password === 'password') {
         storage.setItem("isLoggedIn", "true");
-        container.style.display = 'none'; // 隐藏登录罩子
-        searchPage.style.display = 'block'; // 显示搜索罩子
+        container.classList.add('hidden');
+        searchPage.classList.add('is-active');
         alert('登录成功！');
     } else {
         alert('邮箱或密码错误');
@@ -46,16 +46,16 @@ function handleSignUp(event) {
 
 function handleLogout() {
     storage.removeItem("isLoggedIn");
-    container.style.display = 'block'; // 显示登录罩子
-    searchPage.style.display = 'none'; // 隐藏搜索罩子
+    container.classList.remove('hidden');
+    searchPage.classList.remove('is-active');
     alert('已退出登录！');
 }
 
-// 初始化检查
+// 初始化
 if (isLoggedIn()) {
-    container.style.display = 'none';
-    searchPage.style.display = 'block';
+    container.classList.add('hidden');
+    searchPage.classList.add('is-active');
 } else {
-    container.style.display = 'block';
-    searchPage.style.display = 'none';
+    container.classList.remove('hidden');
+    searchPage.classList.remove('is-active');
 }
