@@ -219,6 +219,10 @@
     overflow: hidden;
 }
 
+.auth-container.hidden {
+    display: none;
+}
+
 .form-container form {
     background: #051015;
     display: flex;
