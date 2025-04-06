@@ -154,7 +154,7 @@
 
 .search-bar {
     position: absolute;
-    bottom: 20px;
+    bottom: 10px;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -184,7 +184,7 @@
     border: 1px solid #00ffad;
     color: #fff;
     padding: 10px 20px;
-    border-radius: 20px;
+    border-radius: 4px;
     cursor: pointer;
     transition: background 0.3s ease;
 }
