@@ -16,7 +16,8 @@
     background: #051015;
 }
 
-/* 搜索页面 */
+/* ================= Search ================= */
+
 #search-page {
     display: none; /* 默认隐藏 */
     position: absolute;
@@ -173,7 +174,8 @@
     color: #051015;
 }
 
-/* 登录/注册容器 */
+/* ================= Auth ================= */
+
 .auth-container {
     position: relative;
     top: 0;
@@ -370,4 +372,94 @@ button.ghost:hover {
 
 .auth-container.right-panel-active .overlay {
     transform: translateX(50%);
+}
+
+/* ================= Social ================= */
+
+@keyframes bounceIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.social li {
+  animation-duration: 1s;
+  animation-timing-function: cubic-bezier(0, 0.5, 0, 1);
+  animation-fill-mode: both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.social li {
+  animation-duration: 500ms;
+  animation-name: slideUp;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1.5);
+}
+
+.social li:nth-child(1) {
+  animation-delay: 800ms;
+}
+.social li:nth-child(2) {
+  animation-delay: 900ms;
+}
+.social li:nth-child(3) {
+  animation-delay: 1s;
+}
+.social li:nth-child(4) {
+  animation-delay: 1.1s;
+}
+.social li:nth-child(5) {
+  animation-delay: 1.2s;
+}
+
+.social a {
+  transform-origin: center;
+  transition-duration: 100ms;
+}
+
+.social {
+  display: flex;
+  margin-top: 1.5rem;
+}
+.social li {
+  height: 2rem;
+  margin-right: 0.5rem;
+  text-align: center;
+  width: 2rem;
+}
+
+.social a {
+align-items: center;
+display: flex;
+font-size: 1.5rem;
+height: 2rem;
+justify-content: center;
+opacity: 0.5;
+transition-property: opacity, transform;
+width: 2rem;
+will-change: opacity, transform;
+}
+
+.social a:hover {
+  opacity: 1;
+  transform: scale(1.25);
+}
+
+social a:active {
+  opacity: 1;
+  transform: scale(1.1);
 }
