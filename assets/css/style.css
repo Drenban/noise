@@ -94,10 +94,17 @@
 }
 
 .search-history {
+    width: 0;
+    padding: 0;
+    border-right: none;
+    overflow: hidden;
+    transition: width 0.3s ease, padding 0.3s ease;
+}
+
+.search-history.visible {
     width: 20%;
     padding: 20px;
     border-right: 1px solid #51585b;
-    overflow-y: auto;
 }
 
 .search-history h3 {
@@ -121,10 +128,15 @@
 }
 
 .search-content {
-    width: 80%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
+    transition: width 0.3s ease;
+}
+
+.search-history.visible + .search-content {
+    width: 80%;
 }
 
 .search-results {
