@@ -1,3 +1,11 @@
+/* 外层容器 */
+#shader-quant.is-active {
+    position: relative;
+    height: 400px;
+    border: 1px solid #51585b;
+    background: #051015;
+}
+
 /* 底层内容 */
 #shader-quant-cm.is-active {
     position: relative;
