@@ -189,10 +189,23 @@
 }
 
 .search-bar input:focus {
-    background: #051015;
+    background: transparent;
+    background-image: linear-gradient(to right, rgba(255, 59, 59, 0.3) 50%, transparent 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    animation: fillBackground 1.8s ease forwards;
     border: 1px solid #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
     outline: none;
+}
+
+@keyframes fillBackground {
+    from {
+        background-position: 100% 0;
+    }
+    to {
+        background-position: 0 0;
+    }
 }
 
 .search-bar button {
@@ -219,7 +232,7 @@
 }
 
 .search-bar .search-btn:active,
-.random-btn:hover {
+.random-btn:active {
     background: #051015;
     border-color: #00ffad;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -227,7 +240,7 @@
 }
 
 .search-bar .search-btn:focus,
-.random-btn:hover {
+.random-btn:focus {
     outline: none;
     border-color: #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
