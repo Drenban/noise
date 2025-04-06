@@ -6,14 +6,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchPage = document.getElementById('search-page');
     const historyButton = document.querySelector('.history-btn');
     const searchHistory = document.querySelector('.search-history');
+    const logoutButton = document.querySelector('.logout-btn');
 
     const storage = sessionStorage;
     const isLoggedIn = () => storage.getItem("isLoggedIn") === "true";
+
+    // 检查 DOM 元素
+    if (!container || !searchPage || !logoutButton) {
+        console.error("DOM elements not found:", { container, searchPage, logoutButton });
+        return;
+    }
 
     // 历史按钮开关功能
     historyButton.addEventListener('click', () => {
         searchHistory.classList.toggle('visible');
     });
+
+    // 退出按钮功能
+    logoutButton.addEventListener('click', handleLogout);
 
     signUpButton.addEventListener('click', () => {
         container.classList.add('right-panel-active');
@@ -56,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         storage.removeItem("isLoggedIn");
         container.classList.remove('hidden');
         searchPage.classList.remove('is-active');
-        searchHistory.classList.remove('visible'); // 登出时隐藏历史记录
+        searchHistory.classList.remove('visible');
         alert('已退出登录！');
     }
 
@@ -69,3 +79,17 @@ document.addEventListener('DOMContentLoaded', () => {
         searchPage.classList.remove('is-active');
     }
 });
+
+// 暴露 handleLogout 到全局（兼容 onclick）
+window.handleLogout = function() {
+    const storage = sessionStorage;
+    const container = document.getElementById('auth-container');
+    const searchPage = document.getElementById('search-page');
+    const searchHistory = document.querySelector('.search-history');
+
+    storage.removeItem("isLoggedIn");
+    container.classList.remove('hidden');
+    searchPage.classList.remove('is-active');
+    searchHistory.classList.remove('visible');
+    alert('已退出登录！');
+};
