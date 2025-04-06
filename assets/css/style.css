@@ -1,4 +1,3 @@
-/* 外层容器 */
 #shader-quant.is-active {
     position: relative;
     height: 400px;
@@ -7,7 +6,6 @@
     background: #051015;
 }
 
-/* 底层内容 */
 #shader-quant-cm.is-active {
     position: relative;
     width: 100%;
@@ -44,7 +42,6 @@
     display: block;
 }
 
-/* 搜索头部 */
 .search-header {
     height: 40px;
     width: 100%;
@@ -91,7 +88,6 @@
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
 }
 
-/* 搜索主体 */
 .search-body {
     height: calc(100% - 40px);
     display: flex;
