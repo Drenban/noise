@@ -513,79 +513,82 @@
                             </div>
                         </div>
                         <div id="shader-quant" class="is-active">
+                            <!-- 底层内容 -->
                             <div id="shader-quant-cm" class="is-active">
-                                <!-- 搜索页面 -->
-<!--                                 <div id="search-page">
-                                    <div class="search-header">
-                                        <button class="history-btn">历史</button>
-                                        <button class="logout-btn" onclick="handleLogout()">退出</button>
-                                    </div>
-                                    <div class="search-body">
-                                        <div class="search-history">
-                                            <h3>历史记录</h3>
-                                            <ul id="history-list"> -->
-                                                <!-- 动态填充 -->
-<!--                                             </ul>
-                                        </div>
-                                        <div class="search-content">
-                                            <div class="search-results">
-                                                <ul id="results-list"> -->
-                                                    <!-- 搜索结果 -->
-<!--                                                 </ul>
-                                            </div>
-                                            <div class="search-bar">
-                                                <input type="text" placeholder="搜索..." id="search-input">
-                                                <button class="search-btn">搜索</button>
-                                                <button class="random-btn">随机</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
+                                <!-- 这里可以放置其他内容，如 quant-controls，不会被挤出 -->
+                            </div>
                         
-                                <!-- 登录/注册页面 -->
-                                <div class="auth-container" id="auth-container">
-                                    <div class="form-container sign-in-container">
-                                        <form action="#" onsubmit="handleSignIn(event)">
-                                            <h1>登录</h1>
-                                            <ul class="social">
-                                                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                                <li><a href="#"><i class="fab fa-github"></i></a></li>
-                                                <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
-                                            </ul>
-                                            <span>或使用您的帐户</span>
-                                            <input type="email" placeholder="邮箱" required />
-                                            <input type="password" placeholder="密码" required />
-                                            <a href="#">忘记密码？</a>
-                                            <button type="submit">登录</button>
-                                        </form>
+                            <!-- 搜索页面罩子 -->
+                            <div id="search-page">
+                                <div class="search-header">
+                                    <button class="history-btn">历史</button>
+                                    <button class="logout-btn" onclick="handleLogout()">退出</button>
+                                </div>
+                                <div class="search-body">
+                                    <div class="search-history">
+                                        <h3>历史记录</h3>
+                                        <ul id="history-list">
+                                            <!-- 动态填充 -->
+                                        </ul>
                                     </div>
-                                    <div class="form-container sign-up-container">
-                                        <form action="#" onsubmit="handleSignUp(event)">
-                                            <h1>创建账户</h1>
-                                            <ul class="social">
-                                                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                                <li><a href="#"><i class="fab fa-github"></i></a></li>
-                                                <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                                    <div class="search-content">
+                                        <div class="search-results">
+                                            <ul id="results-list">
+                                                <!-- 搜索结果 -->
                                             </ul>
-                                            <span>或使用您的电子邮件注册</span>
-                                            <input type="text" placeholder="用户名" required />
-                                            <input type="email" placeholder="邮箱" required />
-                                            <input type="password" placeholder="密码" required />
-                                            <button type="submit">注册</button>
-                                        </form>
+                                        </div>
+                                        <div class="search-bar">
+                                            <input type="text" placeholder="搜索..." id="search-input">
+                                            <button class="search-btn">搜索</button>
+                                            <button class="random-btn">随机</button>
+                                        </div>
                                     </div>
-                                    <div class="overlay-container">
-                                        <div class="overlay">
-                                            <div class="overlay-panel overlay-left">
-                                                <h1>欢迎回来！</h1>
-                                                <p>请使用您的个人信息登录</p>
-                                                <button class="ghost" id="signIn">登录</button>
-                                            </div>
-                                            <div class="overlay-panel overlay-right">
-                                                <h1>您好，朋友！</h1>
-                                                <p>输入个人信息，开始旅程</p>
-                                                <button class="ghost" id="signUp">注册</button>
-                                            </div>
+                                </div>
+                            </div>
+                        
+                            <!-- 登录/注册页面罩子 -->
+                            <div class="auth-container" id="auth-container">
+                                <div class="form-container sign-in-container">
+                                    <form action="#" onsubmit="handleSignIn(event)">
+                                        <h1>登录</h1>
+                                        <ul class="social">
+                                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-github"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                                        </ul>
+                                        <span>或使用您的帐户</span>
+                                        <input type="email" placeholder="邮箱" required />
+                                        <input type="password" placeholder="密码" required />
+                                        <a href="#">忘记密码？</a>
+                                        <button type="submit">登录</button>
+                                    </form>
+                                </div>
+                                <div class="form-container sign-up-container">
+                                    <form action="#" onsubmit="handleSignUp(event)">
+                                        <h1>创建账户</h1>
+                                        <ul class="social">
+                                            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-github"></i></a></li>
+                                            <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                                        </ul>
+                                        <span>或使用您的电子邮件注册</span>
+                                        <input type="text" placeholder="用户名" required />
+                                        <input type="email" placeholder="邮箱" required />
+                                        <input type="password" placeholder="密码" required />
+                                        <button type="submit">注册</button>
+                                    </form>
+                                </div>
+                                <div class="overlay-container">
+                                    <div class="overlay">
+                                        <div class="overlay-panel overlay-left">
+                                            <h1>欢迎回来！</h1>
+                                            <p>请使用您的个人信息登录</p>
+                                            <button class="ghost" id="signIn">登录</button>
+                                        </div>
+                                        <div class="overlay-panel overlay-right">
+                                            <h1>您好，朋友！</h1>
+                                            <p>输入个人信息，开始旅程</p>
+                                            <button class="ghost" id="signUp">注册</button>
                                         </div>
                                     </div>
                                 </div>
