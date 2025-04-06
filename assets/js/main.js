@@ -1,4 +1,3 @@
-// auth.js
 document.addEventListener('DOMContentLoaded', () => {
     const signUpButton = document.getElementById('signUp');
     const signInButton = document.getElementById('signIn');
@@ -12,21 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const storage = sessionStorage;
     const isLoggedIn = () => storage.getItem("isLoggedIn") === "true";
 
-    // 检查 DOM 元素
     if (!container || !searchPage || !logoutButton || !signInForm) {
         console.error("DOM elements not found:", { container, searchPage, logoutButton, signInForm });
         return;
     }
 
-    // 历史按钮开关功能
     historyButton.addEventListener('click', () => {
         searchHistory.classList.toggle('visible');
     });
 
-    // 退出按钮功能
     logoutButton.addEventListener('click', handleLogout);
 
-    // 登录表单提交事件
     signInForm.addEventListener('submit', handleSignIn);
 
     signUpButton.addEventListener('click', () => {
@@ -38,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function handleSignIn(event) {
-        event.preventDefault(); // 阻止默认提交
+        event.preventDefault();
         const email = document.querySelector('.sign-in-container input[type="email"]').value;
         const password = document.querySelector('.sign-in-container input[type="password"]').value;
 
@@ -71,10 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
         container.classList.remove('hidden');
         searchPage.classList.remove('is-active');
         searchHistory.classList.remove('visible');
-        alert('已退出登录！');
     }
 
-    // 初始化
     if (isLoggedIn()) {
         container.classList.add('hidden');
         searchPage.classList.add('is-active');
@@ -84,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 暴露 handleLogout 到全局（兼容 onclick）
 window.handleLogout = function() {
     const storage = sessionStorage;
     const container = document.getElementById('auth-container');
