@@ -1,4 +1,3 @@
-// auth.js
 document.addEventListener('DOMContentLoaded', () => {
     const signUpButton = document.getElementById('signUp');
     const signInButton = document.getElementById('signIn');
@@ -24,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const storage = sessionStorage;
 
-    // Supabase 配置
     const supabaseUrl = 'https://xupnsfldgnmeicumtqpp.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro';
 
@@ -36,13 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return supabase.createClient(supabaseUrl, supabaseKey);
     }
 
-    // 检查 DOM 元素
     if (!container || !searchPage || !logoutButton || !signInForm || !signUpForm || !searchInput || !searchButton || !randomButton || !resultsList || !historyList) {
         console.error("DOM elements not found:", { container, searchPage, logoutButton, signInForm, signUpForm, searchInput, searchButton, randomButton, resultsList, historyList });
         return;
     }
 
-    // Base64 解码函数
     function decodeBase64UTF8(base64Str) {
         try {
             const binaryStr = atob(base64Str);
@@ -56,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 加载 JSON 数据
     async function loadJSONData() {
         try {
             const response = await fetch('/assets/data/encrypted_data.json');
@@ -71,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 加载语料库
     async function loadCorpus() {
         try {
             const response = await fetch('/assets/data/encrypted_corpus.json');
@@ -99,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 搜索 JSON 数据
     function searchJSON(query) {
         resultsList.innerHTML = '';
 
@@ -199,7 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return lines;
     }
 
-    // 随机选取符合买入条件的品种
     function getRandomBuy() {
         if (!workbookData) {
             resultsList.innerHTML = '<li>数据未加载，请稍后再试</li>';
@@ -218,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateHistory();
     }
 
-    // 搜索语料库
     function searchCorpus(query) {
         resultsList.innerHTML = '';
 
@@ -240,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return answer;
     }
 
-    // 检测意图
     function detectIntent(input) {
         const lowerInput = input.toLowerCase().replace(/\s+/g, ' ').trim();
         const intents = [
@@ -258,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
 
-    // 生成响应
     function generateResponse(intent, match) {
         if (match) {
             const score = (1 - match.score).toFixed(2);
@@ -276,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return '抱歉，我不太明白您的意思，可以换个说法试试吗？';
     }
 
-    // 显示结果的打字效果
     function typeLines(lines, element) {
         if (!element) return;
         let lineIndex = 0;
@@ -307,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
         typeNext();
     }
 
-    // 更新搜索历史
     function updateHistory() {
         historyList.innerHTML = '';
         window.searchHistory.slice(0, 10).forEach(item => {
@@ -321,7 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 密码哈希
     async function hashPassword(password) {
         const encoder = new TextEncoder();
         const data = encoder.encode(password);
@@ -329,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // 生成 token
     function generateToken(username) {
         const salt = crypto.randomUUID();
         const payload = { username, exp: Date.now() + 3600000, salt }; // 1小时有效期
@@ -337,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return btoa(JSON.stringify(payload));
     }
 
-    // 检查会员有效期
     function isMembershipValid(expiryDate) {
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
@@ -345,12 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return expiry.getTime() > currentDate.getTime() && !isNaN(expiry.getTime());
     }
 
-    // 输入清理
     function sanitizeInput(input) {
         return input.replace(/[<>&;"]/g, '');
     }
 
-    // 验证 token
     function verifyToken(token) {
         if (!token) {
             localStorage.removeItem('token');
@@ -389,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 加载用户数据（JSON）
     async function loadUserData(username) {
         try {
             const response = await fetch(`/assets/users/${username}.json`);
@@ -414,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const supabaseClient = getSupabaseClient();
             let supabaseSuccess = false;
 
-            // 首先检查 Supabase
             if (supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -450,7 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.warn('Supabase 客户端未初始化，跳过 Supabase 验证');
             }
 
-            // 如果 Supabase 失败或不可用，检查 JSON 文件
             if (!supabaseSuccess) {
                 const userData = await loadUserData(email);
                 if (!userData) {
@@ -501,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + 7); // 默认7天有效期
+            expiryDate.setDate(expiryDate.getDate() + 7);
             const expiryDateString = expiryDate.toISOString().split('T')[0];
 
             try {
@@ -588,7 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 事件监听器
     historyButton.addEventListener('click', () => {
         searchHistory.classList.toggle('visible');
     });
@@ -615,7 +593,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     randomButton.addEventListener('click', getRandomBuy);
 
-    // 初始化
     if (storage.getItem("isLoggedIn") === "true" && verifyToken(localStorage.getItem('token'))) {
         container.classList.add('hidden');
         searchPage.classList.add('is-active');
@@ -629,7 +606,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.PeekXAuth = PeekXAuth;
 });
 
-// 全局 handleLogout
 window.handleLogout = function() {
     const storage = sessionStorage;
     const container = document.getElementById('auth-container');
