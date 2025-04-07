@@ -1,16 +1,14 @@
-// 常量配置
 const CONFIG = {
     SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
     JSON_DATA_PATH: '/noise/assets/data/data.json',
     CORPUS_PATH: '/noise/assets/data/corpus.json',
     USER_DATA_PATH: '/noise/assets/obfuscate/',
-    TOKEN_EXPIRY_MS: 3600000, // 1小时
+    TOKEN_EXPIRY_MS: 3600000,
     MAX_HISTORY: 10,
     CACHE_LIMIT: 100
 };
 
-// DOM 元素缓存
 const ELEMENTS = {
     signUpButton: document.getElementById('signUp'),
     signInButton: document.getElementById('signIn'),
@@ -29,13 +27,11 @@ const ELEMENTS = {
     randomButton: document.querySelector('.random-btn')
 };
 
-// 检查 DOM 元素是否完整
 if (Object.values(ELEMENTS).some(el => !el)) {
     console.error('DOM elements missing:', ELEMENTS);
     throw new Error('Initialization failed due to missing DOM elements');
 }
 
-// 数据存储
 const state = {
     userData: null,
     workbookData: null,
@@ -45,7 +41,6 @@ const state = {
     searchHistory: []
 };
 
-// 工具函数
 const utils = {
     decodeBase64UTF8(base64Str) {
         try {
@@ -109,7 +104,6 @@ const utils = {
     }
 };
 
-// 数据加载
 const dataLoader = {
     async loadJSONData() {
         try {
@@ -161,7 +155,6 @@ const dataLoader = {
     }
 };
 
-// 搜索逻辑
 const search = {
     json(query) {
         if (!state.workbookData) {
@@ -327,7 +320,6 @@ const search = {
     }
 };
 
-// 认证与核心逻辑
 const PeekXAuth = {
     supabaseClient: typeof supabase !== 'undefined' ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null,
 
@@ -452,7 +444,6 @@ const PeekXAuth = {
     }
 };
 
-// 事件绑定
 document.addEventListener('DOMContentLoaded', () => {
     ELEMENTS.signUpButton.addEventListener('click', () => ELEMENTS.container.classList.add('right-panel-active'));
     ELEMENTS.signInButton.addEventListener('click', () => ELEMENTS.container.classList.remove('right-panel-active'));
@@ -475,13 +466,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', adjustResultsWidth);
 });
 
-// 宽度调整
 function adjustResultsWidth() {
     if (ELEMENTS.searchBar && ELEMENTS.resultsList) {
         ELEMENTS.resultsList.style.width = `${ELEMENTS.searchBar.offsetWidth}px`;
     }
 }
 
-// 全局暴露
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
