@@ -487,6 +487,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search.bind(PeekXAuth));
     ELEMENTS.searchInput.addEventListener('keydown', e => e.key === 'Enter' && PeekXAuth.search());
     ELEMENTS.randomButton.addEventListener('click', search.random);
+    ELEMENTS.randomButton.addEventListener('click', () => {
+        console.log('Random button clicked');
+        search.random();
+    });
 
     if (sessionStorage.getItem('isLoggedIn') === 'true' && utils.verifyToken(localStorage.getItem('token'))) {
         PeekXAuth.postLogin();
