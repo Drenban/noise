@@ -40,7 +40,8 @@ const state = {
     searchCache: new Map(),
     searchHistory: [],
     randomCount: 0,
-    maxRandomCount: 5
+    maxRandomCount: 5,
+    isAnimating: false
 };
 
 const utils = {
@@ -266,17 +267,35 @@ const search = {
 
     typeLines(lines, element) {
         if (!element || !lines) return;
+        if (state.isAnimating) return; // 如果已在动画，直接退出
+
+        state.isAnimating = true;
+        // 禁用按钮
+        ELEMENTS.searchButton.disabled = true;
+        ELEMENTS.randomButton.disabled = true;
+        ELEMENTS.historyButton.disabled = true;
+        ELEMENTS.historyList.querySelectorAll('li').forEach(li => li.style.pointerEvents = 'none'); // 禁用历史记录点击
+
         element.innerHTML = '';
         let lineIndex = 0;
-    
+
         const typeNextLine = () => {
-            if (lineIndex >= lines.length) return;
+            if (!state.isAnimating || lineIndex >= lines.length) {
+                // 动画结束，恢复按钮
+                state.isAnimating = false;
+                ELEMENTS.searchButton.disabled = false;
+                ELEMENTS.randomButton.disabled = false;
+                ELEMENTS.historyButton.disabled = false;
+                ELEMENTS.historyList.querySelectorAll('li').forEach(li => li.style.pointerEvents = 'auto');
+                return;
+            }
             const line = document.createElement('div');
             line.className = 'line';
             element.appendChild(line);
             let charIndex = 0;
             const content = lines[lineIndex] || '';
             const typeChar = (timestamp, lastTime = 0) => {
+                if (!state.isAnimating) return; // 如果动画被中止，退出
                 if (charIndex < content.length && timestamp - lastTime > 20) {
                     line.innerHTML = content.slice(0, ++charIndex);
                     lastTime = timestamp;
@@ -294,40 +313,47 @@ const search = {
         typeNextLine();
     },
     
-    random() {        
-        if (!state.workbookData) {            
-        ELEMENTS.resultsList.innerHTML = '<li>Data not loaded, please try again later</li>';            
-        return;        
-        }            
-        if (state.randomCount >= state.maxRandomCount) {            
-        ELEMENTS.resultsList.innerHTML = `<li>随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用</li>`;            
-        return;        
-        }            
-        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');        
-        if (!buyCandidates.length) {            
-        ELEMENTS.resultsList.innerHTML = '<li>没有符合“买入”策略的股票</li>';            
-        return;        
-        }            
-        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];        
-        state.randomCount++;        
-        localStorage.setItem('randomCount', state.randomCount);            
-        ELEMENTS.resultsList.innerHTML = `
-                    <li>                
-        ${Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`).join('<br>')}
-                        <br><span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>
-                    </li>
-                `;            
-        state.searchHistory.unshift(`随机: ${item['股票代码']}`);        
-        this.updateHistory();    
-        },
+    random() {
+        if (!state.workbookData) {
+            this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);
+            return;
+        }
+
+        if (state.randomCount >= state.maxRandomCount) {
+            this.typeLines([`随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用`], ELEMENTS.resultsList);
+            return;
+        }
+
+        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');
+        if (!buyCandidates.length) {
+            this.typeLines(['没有符合“买入”策略的股票'], ELEMENTS.resultsList);
+            return;
+        }
+
+        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];
+        state.randomCount++;
+        localStorage.setItem('randomCount', state.randomCount);
+
+        const lines = [
+            ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),
+            `<span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>`
+        ];
+
+        this.typeLines(lines, ELEMENTS.resultsList);
+
+        state.searchHistory.unshift(`随机: ${item['股票代码']}`);
+        this.updateHistory();
+    },
     
     updateHistory() {
         ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, CONFIG.MAX_HISTORY)
             .map(item => `<li>${item}</li>`).join('');
         ELEMENTS.historyList.querySelectorAll('li').forEach(li => {
             li.addEventListener('click', () => {
-                ELEMENTS.searchInput.value = li.textContent;
-                PeekXAuth.search();
+                if (!state.isAnimating) { // 仅在非动画时触发
+                    ELEMENTS.searchInput.value = li.textContent;
+                    PeekXAuth.search();
+                }
             });
         });
     }
@@ -422,7 +448,6 @@ const PeekXAuth = {
         const query = ELEMENTS.searchInput.value.trim();
         if (!query) return;
 
-        ELEMENTS.resultsList.innerHTML = '';
         const isJSONQuery = query.includes(':') || /^[A-Za-z]+\d+$|^\d+[A-Za-z]+$|^\d+$/.test(query) || (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2);
         const result = isJSONQuery ? search.json(query) : search.corpus(query);
 
@@ -431,6 +456,7 @@ const PeekXAuth = {
             return;
         }
         search.typeLines(typeof result === 'string' ? result.split('\n').filter(Boolean) : result, ELEMENTS.resultsList);
+
         if (!state.searchHistory.includes(query)) {
             state.searchHistory.unshift(query);
             search.updateHistory();
