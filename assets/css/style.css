@@ -81,12 +81,14 @@
 
 /* 搜索头部 */
 .search-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
     background: #051015;
     border-bottom: 1px solid #51585b;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    min-height: 40px;
 }
 
 /* 搜索主体 */
@@ -163,7 +165,7 @@
     font-size: 14px;
     list-style: none;
     margin: 10px auto;
-    padding: 0 10%; /* 左右边距 */
+    padding: 0 20%; /* 左右边距 */
     text-align: left; /* 居中 */
     width: 80%; /* 改为 100%，由 JS 动态调整 */
 }
