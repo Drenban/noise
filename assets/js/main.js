@@ -571,14 +571,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function adjustResultsWidth() {
-        const searchInput = document.getElementById('search-input');
-        const searchButton = document.querySelector('.search-btn');
-        const randomButton = document.querySelector('.random-btn');
-        const resultsList = document.getElementById('results-list');
-        
-        if (searchInput && searchButton && randomButton && resultsList) {
-            const totalWidth = searchInput.offsetWidth + searchButton.offsetWidth + randomButton.offsetWidth;
-            resultsList.style.width = `${totalWidth}px`; // 设置结果容器宽度
+        const searchBar = document.querySelector('.search-bar');
+        const resultsList = document.querySelector('.search-results ul');
+        if (searchBar && resultsList) {
+            resultsList.style.width = `${searchBar.offsetWidth}px`;
         }
     }
 
