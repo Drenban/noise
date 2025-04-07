@@ -296,16 +296,16 @@ const search = {
         this.updateHistory();
     },
     
-    function resetRandomCount() {
-        state.randomCount = 0;
-        localStorage.setItem('randomCount', 0);
-        console.log('随机次数已重置');
-    },
+    // function resetRandomCount() {
+    //     state.randomCount = 0;
+    //     localStorage.setItem('randomCount', 0);
+    //     console.log('随机次数已重置');
+    // },
     
-    ELEMENTS.resetButton = document.getElementById('reset-random');
-    if (ELEMENTS.resetButton) {
-        ELEMENTS.resetButton.addEventListener('click', resetRandomCount);
-    },
+    // ELEMENTS.resetButton = document.getElementById('reset-random');
+    // if (ELEMENTS.resetButton) {
+    //     ELEMENTS.resetButton.addEventListener('click', resetRandomCount);
+    // },
 
     typeLines(lines, element) {
         if (!element || !lines) return;
