@@ -16,16 +16,17 @@ const ELEMENTS = {
     signInButton: document.getElementById('signIn'),
     container: document.getElementById('auth-container'),
     searchPage: document.getElementById('search-page'),
+    searchInput: document.getElementById('search-input'),
+    resultsList: document.getElementById('results-list'),
+    historyList: document.getElementById('history-list'),
+    searchBar: document.querySelector('.search-bar'),
     historyButton: document.querySelector('.history-btn'),
     searchHistory: document.querySelector('.search-history'),
     logoutButton: document.querySelector('.logout-btn'),
     signInForm: document.querySelector('.sign-in-container form'),
     signUpForm: document.querySelector('.sign-up-container form'),
-    searchInput: document.getElementById('search-input'),
     searchButton: document.querySelector('.search-btn'),
-    randomButton: document.querySelector('.random-btn'),
-    resultsList: document.getElementById('results-list'),
-    historyList: document.getElementById('history-list')
+    randomButton: document.querySelector('.random-btn')
 };
 
 // 检查 DOM 元素是否完整
@@ -71,26 +72,35 @@ const utils = {
     },
 
     verifyToken(token) {
-        if (!token) return false;
+        if (!token) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('salt');
+            return false;
+        }
         try {
             const payload = JSON.parse(atob(token.includes('.') ? token.split('.')[1] : token));
             const exp = token.includes('.') ? payload.exp * 1000 : payload.exp;
-            if (!exp || exp < Date.now()) return false;
-            if (!token.includes('.') && payload.salt !== localStorage.getItem('salt')) return false;
-            return true;
-        } catch {
-            return false;
-        } finally {
-            if (!this.verifyToken(token)) {
+            if (!exp || exp < Date.now()) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('salt');
+                return false;
             }
+            if (!token.includes('.') && payload.salt !== localStorage.getItem('salt')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('salt');
+                return false;
+            }
+            return true;
+        } catch {
+            localStorage.removeItem('token');
+            localStorage.removeItem('salt');
+            return false;
         }
     },
 
-    const sanitizeInput = (input) => {
+    sanitizeInput(input) {
         return input.replace(/[&<>"'`;=()/\\]/g, '');
-    };
+    },
 
     isMembershipValid(expiryDate) {
         const current = new Date().setHours(0, 0, 0, 0);
@@ -275,11 +285,11 @@ const search = {
         this.updateHistory();
     },
 
-    const typeLines = (lines, element) => {
+    typeLines(lines, element) {
         if (!element || !lines) return;
         element.innerHTML = '';
         let lineIndex = 0;
-
+    
         const typeNextLine = () => {
             if (lineIndex >= lines.length) return;
             const line = document.createElement('div');
@@ -287,20 +297,23 @@ const search = {
             element.appendChild(line);
             let charIndex = 0;
             const content = lines[lineIndex] || '';
-            const typeChar = () => {
-                if (charIndex < content.length) {
+            const typeChar = (timestamp, lastTime = 0) => {
+                if (charIndex < content.length && timestamp - lastTime > 20) { // 每 20ms 更新一次
                     line.innerHTML = content.slice(0, ++charIndex);
-                    requestAnimationFrame(typeChar);
+                    lastTime = timestamp;
+                }
+                if (charIndex < content.length) {
+                    requestAnimationFrame(t => typeChar(t, lastTime));
                 } else {
                     lineIndex++;
                     setTimeout(typeNextLine, 300);
                 }
             };
-            typeChar();
+            requestAnimationFrame(typeChar);
             element.scrollTop = element.scrollHeight;
         };
         typeNextLine();
-    };
+    },
 
     updateHistory() {
         ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, CONFIG.MAX_HISTORY)
