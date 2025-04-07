@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadJSONData() {
         try {
-            const response = await fetch('/assets/data/encrypted_data.json');
+            const response = await fetch('/assets/data/data.json');
             if (!response.ok) throw new Error('无法加载 JSON 数据');
             const encryptedData = await response.text();
             const decodedData = decodeBase64UTF8(encryptedData);
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadCorpus() {
         try {
-            const response = await fetch('/assets/data/encrypted_corpus.json');
+            const response = await fetch('/assets/data/corpus.json');
             if (!response.ok) throw new Error(`无法加载语料库: ${response.status}`);
             const encryptedData = await response.text();
             const decodedData = decodeBase64UTF8(encryptedData);
@@ -373,9 +373,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadUserData(username) {
         try {
-            const response = await fetch(`/assets/users/${username}.json`);
+            const response = await fetch(`/assets/obfuscate/${username}.json`);
             if (response.status === 404) return false;
-            if (!response.ok) throw new Error(`Failed to fetch /assets/users/${username}.json`);
+            if (!response.ok) throw new Error(`Failed to fetch /assets/obfuscate/${username}.json`);
             const encryptedData = await response.text();
             const decodedData = decodeBase64UTF8(encryptedData);
             userData = JSON.parse(decodedData);
