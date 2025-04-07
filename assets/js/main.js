@@ -188,8 +188,13 @@ const search = {
             }
         } else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
             isSimpleQuery = true;
-            name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-            age = query.match(/\d+/)[0];
+            if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) { // "10买入"
+                age = query.match(/\d+/)[0];
+                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+            } else { // "买入10"
+                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+                age = query.match(/\d+/)[0];
+            }
             conditions['策略'] = name;
             conditions['收盘价'] = age;
         } else if (/^\d+$/.test(query)) {
