@@ -1,80 +1,124 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const signUpButton = document.getElementById('signUp');
-    const signInButton = document.getElementById('signIn');
-    const container = document.getElementById('auth-container');
-    const searchPage = document.getElementById('search-page');
-    const historyButton = document.querySelector('.history-btn');
-    const searchHistory = document.querySelector('.search-history');
-    const logoutButton = document.querySelector('.logout-btn');
-    const signInForm = document.querySelector('.sign-in-container form');
-    const signUpForm = document.querySelector('.sign-up-container form');
-    const searchInput = document.getElementById('search-input');
-    const searchButton = document.querySelector('.search-btn');
-    const randomButton = document.querySelector('.random-btn');
-    const resultsList = document.getElementById('results-list');
-    const historyList = document.getElementById('history-list');
+// 常量配置
+const CONFIG = {
+    SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
+    JSON_DATA_PATH: '/noise/assets/data/data.json',
+    CORPUS_PATH: '/noise/assets/data/corpus.json',
+    USER_DATA_PATH: '/noise/assets/obfuscate/',
+    TOKEN_EXPIRY_MS: 3600000, // 1小时
+    MAX_HISTORY: 10,
+    CACHE_LIMIT: 100
+};
 
-    let userData = null;
-    let workbookData = null;
-    let corpus = null;
-    let fuse = null;
-    const searchCache = new Map();
-    window.searchHistory = [];
+// DOM 元素缓存
+const ELEMENTS = {
+    signUpButton: document.getElementById('signUp'),
+    signInButton: document.getElementById('signIn'),
+    container: document.getElementById('auth-container'),
+    searchPage: document.getElementById('search-page'),
+    historyButton: document.querySelector('.history-btn'),
+    searchHistory: document.querySelector('.search-history'),
+    logoutButton: document.querySelector('.logout-btn'),
+    signInForm: document.querySelector('.sign-in-container form'),
+    signUpForm: document.querySelector('.sign-up-container form'),
+    searchInput: document.getElementById('search-input'),
+    searchButton: document.querySelector('.search-btn'),
+    randomButton: document.querySelector('.random-btn'),
+    resultsList: document.getElementById('results-list'),
+    historyList: document.getElementById('history-list')
+};
 
-    const storage = sessionStorage;
+// 检查 DOM 元素是否完整
+if (Object.values(ELEMENTS).some(el => !el)) {
+    console.error('DOM elements missing:', ELEMENTS);
+    throw new Error('Initialization failed due to missing DOM elements');
+}
 
-    const supabaseUrl = 'https://xupnsfldgnmeicumtqpp.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro';
+// 数据存储
+const state = {
+    userData: null,
+    workbookData: null,
+    corpus: null,
+    fuse: null,
+    searchCache: new Map(),
+    searchHistory: []
+};
 
-    function getSupabaseClient() {
-        if (typeof supabase === 'undefined') {
-            console.error('Supabase 未加载，请确保已引入 Supabase 客户端库');
-            return null;
-        }
-        return supabase.createClient(supabaseUrl, supabaseKey);
-    }
-
-    if (!container || !searchPage || !logoutButton || !signInForm || !signUpForm || !searchInput || !searchButton || !randomButton || !resultsList || !historyList) {
-        console.error("DOM elements not found:", { container, searchPage, logoutButton, signInForm, signUpForm, searchInput, searchButton, randomButton, resultsList, historyList });
-        return;
-    }
-
-    function decodeBase64UTF8(base64Str) {
+// 工具函数
+const utils = {
+    decodeBase64UTF8(base64Str) {
         try {
             const binaryStr = atob(base64Str);
             const bytes = new Uint8Array(binaryStr.length);
-            for (let i = 0; i < binaryStr.length; i++) {
-                bytes[i] = binaryStr.charCodeAt(i);
-            }
+            for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
             return new TextDecoder('utf-8').decode(bytes);
         } catch (error) {
-            throw new Error('Base64 解码失败: ' + error.message);
+            throw new Error(`Base64 decode failed: ${error.message}`);
         }
-    }
+    },
 
-    async function loadJSONData() {
+    async hashPassword(password) {
+        const data = new TextEncoder().encode(password);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    generateToken(username) {
+        const salt = crypto.randomUUID();
+        const payload = { username, exp: Date.now() + CONFIG.TOKEN_EXPIRY_MS, salt };
+        localStorage.setItem('salt', salt);
+        return btoa(JSON.stringify(payload));
+    },
+
+    verifyToken(token) {
+        if (!token) return false;
         try {
-            const response = await fetch('/noise/assets/data/data.json');
-            if (!response.ok) throw new Error('无法加载 JSON 数据');
-            const encryptedData = await response.text();
-            const decodedData = decodeBase64UTF8(encryptedData);
-            workbookData = JSON.parse(decodedData);
-            console.log('JSON 数据加载完成');
+            const payload = JSON.parse(atob(token.includes('.') ? token.split('.')[1] : token));
+            const exp = token.includes('.') ? payload.exp * 1000 : payload.exp;
+            if (!exp || exp < Date.now()) return false;
+            if (!token.includes('.') && payload.salt !== localStorage.getItem('salt')) return false;
+            return true;
+        } catch {
+            return false;
+        } finally {
+            if (!this.verifyToken(token)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('salt');
+            }
+        }
+    },
+
+    const sanitizeInput = (input) => {
+        return input.replace(/[&<>"'`;=()/\\]/g, '');
+    };
+
+    isMembershipValid(expiryDate) {
+        const current = new Date().setHours(0, 0, 0, 0);
+        const expiry = new Date(expiryDate).getTime();
+        return expiry > current && !isNaN(expiry);
+    }
+};
+
+// 数据加载
+const dataLoader = {
+    async loadJSONData() {
+        try {
+            const response = await fetch(CONFIG.JSON_DATA_PATH);
+            if (!response.ok) throw new Error('Failed to load JSON data');
+            state.workbookData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
+            console.log('JSON data loaded');
         } catch (error) {
-            console.error('加载 JSON 数据失败:', error);
-            resultsList.innerHTML = '<li>服务器繁忙，请稍后再试</li>';
+            console.error('Load JSON failed:', error);
+            ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
         }
-    }
+    },
 
-    async function loadCorpus() {
+    async loadCorpus() {
         try {
-            const response = await fetch('/noise/assets/data/corpus.json');
-            if (!response.ok) throw new Error(`无法加载语料库: ${response.status}`);
-            const encryptedData = await response.text();
-            const decodedData = decodeBase64UTF8(encryptedData);
-            corpus = JSON.parse(decodedData);
-
-            fuse = new Fuse(corpus, {
+            const response = await fetch(CONFIG.CORPUS_PATH);
+            if (!response.ok) throw new Error(`Failed to load corpus: ${response.status}`);
+            state.corpus = JSON.parse(utils.decodeBase64UTF8(await response.text()));
+            state.fuse = new Fuse(state.corpus, {
                 keys: [
                     { name: 'question', weight: 0.5 },
                     { name: 'keywords', weight: 0.3 },
@@ -87,25 +131,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 minMatchCharLength: 2,
                 shouldSort: true
             });
-            console.log('语料库加载完成');
+            console.log('Corpus loaded');
         } catch (error) {
-            console.error('加载语料库失败:', error);
+            console.error('Load corpus failed:', error);
+        }
+    },
+
+    async loadUserData(username) {
+        try {
+            const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
+            if (response.status === 404) return null;
+            if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
+            state.userData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
+            return state.userData;
+        } catch (error) {
+            console.error('Load user data failed:', error);
+            return null;
         }
     }
+};
 
-    function searchJSON(query) {
-        resultsList.innerHTML = '';
-
-        if (!workbookData) {
-            resultsList.innerHTML = '<li>服务器繁忙，请稍后再试</li>';
-            return false;
+// 搜索逻辑
+const search = {
+    json(query) {
+        if (!state.workbookData) {
+            ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
+            return null;
         }
 
         const conditions = {};
         let isSimpleQuery = false;
         let name, age;
-
         query = query.trim().toLowerCase();
+
         if (query.includes(':')) {
             query.split(',').forEach(part => {
                 const [key, value] = part.split(':').map(s => s.trim());
@@ -118,25 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const parts = query.split(/[，, ]+/).map(s => s.trim());
             if (parts.length === 2) {
                 isSimpleQuery = true;
-                if (/^\d+$/.test(parts[0])) {
-                    age = parts[0];
-                    name = parts[1];
-                } else {
-                    name = parts[0];
-                    age = parts[1];
-                }
+                [age, name] = /^\d+$/.test(parts[0]) ? [parts[0], parts[1]] : [parts[1], parts[0]];
                 conditions['策略'] = name;
                 conditions['收盘价'] = age;
             }
         } else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
             isSimpleQuery = true;
-            if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query)) {
-                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-                age = query.match(/\d+/)[0];
-            } else {
-                age = query.match(/\d+/)[0];
-                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-            }
+            name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+            age = query.match(/\d+/)[0];
             conditions['策略'] = name;
             conditions['收盘价'] = age;
         } else if (/^\d+$/.test(query)) {
@@ -145,12 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
             conditions[''] = query;
         }
 
-        const matches = workbookData.filter(row => {
-            if (conditions['']) {
-                return Object.values(row).some(val => 
-                    String(val).toLowerCase().includes(conditions[''])
-                );
-            }
+        const matches = state.workbookData.filter(row => {
+            if (conditions['']) return Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
             return Object.entries(conditions).every(([key, value]) => {
                 const rowValue = String(row[key] || '').toLowerCase();
                 if (!value) return true;
@@ -158,493 +201,274 @@ document.addEventListener('DOMContentLoaded', () => {
                     const [min, max] = value.split('-').map(Number);
                     const numValue = Math.floor(Number(rowValue));
                     return numValue >= min && numValue <= max;
-                } else if (value.startsWith('>')) {
-                    return Math.floor(Number(rowValue)) > Number(value.slice(1));
-                } else if (value.startsWith('<')) {
-                    return Math.floor(Number(rowValue)) < Number(value.slice(1));
                 }
-                if (key.toLowerCase() === '收盘价') {
-                    return Math.floor(Number(rowValue)) === Math.floor(Number(value));
-                }
+                if (value.startsWith('>')) return Math.floor(Number(rowValue)) > Number(value.slice(1));
+                if (value.startsWith('<')) return Math.floor(Number(rowValue)) < Number(value.slice(1));
+                if (key.toLowerCase() === '收盘价') return Math.floor(Number(rowValue)) === Math.floor(Number(value));
                 return rowValue === value;
             });
         });
 
-        if (matches.length === 0) {
-            return false;
-        }
+        if (!matches.length) return null;
 
-        let lines;
-        if (isSimpleQuery) {
-            const codes = matches.map(row => row['股票代码']).filter(code => code !== undefined);
-            lines = [
-                `<span class="field">全部代码:</span><br><span class="value">${codes.join(', ')}</span>`,
-                `<span class="field">合计:</span> <span class="value">${codes.length}</span>`
-            ];
-        } else {
-            lines = matches.flatMap((result, index) => {
-                const resultLines = Object.entries(result).map(([key, value]) => 
-                    `<span class="field">${key}:</span> <span class="value">${value}</span>`
-                );
-                return index < matches.length - 1 ? [...resultLines, '<hr>'] : resultLines;
-            });
-        }
-        return lines;
-    }
+        return isSimpleQuery
+            ? [
+                `<span class="field">全部代码:</span><br><span class="value">${matches.map(row => row['股票代码']).filter(Boolean).join(', ')}</span>`,
+                `<span class="field">合计:</span> <span class="value">${matches.length}</span>`
+            ]
+            : matches.flatMap((result, index) => [
+                ...Object.entries(result).map(([key, value]) => `<span class="field">${key}:</span> <span class="value">${value}</span>`),
+                ...(index < matches.length - 1 ? ['<hr>'] : [])
+            ]);
+    },
 
-    function getRandomBuy() {
-        if (!workbookData) {
-            resultsList.innerHTML = '<li>数据未加载，请稍后再试</li>';
-            return;
-        }
+    corpus(query) {
+        if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
+        query = query.trim().toLowerCase();
+        if (state.searchCache.has(query)) return state.searchCache.get(query);
 
-        const buyCandidates = workbookData.filter(row => Number(row['收盘价']) > 10);
-        if (buyCandidates.length === 0) {
-            resultsList.innerHTML = '<li>未找到符合买入条件的品种</li>';
-            return;
-        }
+        const results = state.fuse.search(query);
+        const bestMatch = results.length && results[0].score < 0.6 ? results[0] : null;
+        const intent = this.detectIntent(query);
+        const answer = this.generateResponse(intent, bestMatch);
 
-        const randomItem = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];
-        resultsList.innerHTML = `<li>${Object.entries(randomItem).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`).join('<br>')}</li>`;
-        window.searchHistory.unshift(`随机: ${randomItem['策略'] || randomItem['股票代码']}`);
-        updateHistory();
-    }
-
-    function searchCorpus(query) {
-        resultsList.innerHTML = '';
-
-        if (!corpus || !fuse) {
-            return '语料库未加载，请稍后再试';
-        }
-
-        const input = query.trim().toLowerCase();
-        if (searchCache.has(input)) {
-            return searchCache.get(input);
-        }
-
-        const results = fuse.search(input);
-        const bestMatch = results.length > 0 && results[0].score < 0.6 ? results[0] : null;
-        const intent = detectIntent(input);
-        const answer = generateResponse(intent, bestMatch);
-
-        searchCache.set(input, answer);
+        if (state.searchCache.size >= CONFIG.CACHE_LIMIT) state.searchCache.clear();
+        state.searchCache.set(query, answer);
         return answer;
-    }
+    },
 
-    function detectIntent(input) {
-        const lowerInput = input.toLowerCase().replace(/\s+/g, ' ').trim();
+    detectIntent(input) {
         const intents = [
             { name: 'time', patterns: ['时间', '什么时候', '几点', '多久', '啥时候', '何时'], fallback: '您想知道什么的时间？可以告诉我更多细节吗？' },
             { name: 'price', patterns: ['价格', '多少钱', '费用', '成本', '价位', '花多少'], fallback: '您想了解哪方面的价格？可以具体一点吗？' },
             { name: 'howto', patterns: ['如何', '怎么', '怎样', '步骤', '方法', '怎么办'], fallback: '您想知道如何做什么？请告诉我具体操作！' },
             { name: 'psychology', patterns: ['心理', '心态', '情绪', '行为'], fallback: '您想了解交易中的什么心理因素？请具体点！' }
         ];
+        return intents.find(intent => intent.patterns.some(pattern => input.includes(pattern))) || null;
+    },
 
-        for (const intent of intents) {
-            if (intent.patterns.some(pattern => lowerInput.includes(pattern))) {
-                return intent;
-            }
-        }
-        return null;
-    }
-
-    function generateResponse(intent, match) {
-        if (match) {
-            const score = (1 - match.score).toFixed(2);
-            if (score < 0.5) return '抱歉，找不到准确答案，您可以换个说法试试！';
-            return `${match.item.answer.trim()}`;
-        }
+    generateResponse(intent, match) {
+        if (match) return (1 - match.score).toFixed(2) < 0.5 ? '抱歉，找不到准确答案，您可以换个说法试试！' : match.item.answer.trim();
         if (intent) {
-            switch (intent.name) {
-                case 'time': return '我可以帮您查时间相关的信息，您具体想知道什么时间？';
-                case 'price': return '价格信息可能因产品不同而异，您想了解哪个产品的价格？';
-                case 'howto': return '我可以指导您完成操作，请告诉我您想做什么！';
-                default: return intent.fallback || '抱歉，我不太明白您的意思，可以换个说法试试吗？';
-            }
+            return {
+                time: '我可以帮您查时间相关的信息，您具体想知道什么时间？',
+                price: '价格信息可能因产品不同而异，您想了解哪个产品的价格？',
+                howto: '我可以指导您完成操作，请告诉我您想做什么！'
+            }[intent.name] || intent.fallback || '抱歉，我不太明白您的意思，可以换个说法试试吗？';
         }
         return '抱歉，我不太明白您的意思，可以换个说法试试吗？';
-    }
+    },
 
-    function typeLines(lines, element) {
-        if (!element) return;
+    random() {
+        if (!state.workbookData) {
+            ELEMENTS.resultsList.innerHTML = '<li>Data not loaded, please try again later</li>';
+            return;
+        }
+        const candidates = state.workbookData.filter(row => Number(row['收盘价']) > 10);
+        if (!candidates.length) {
+            ELEMENTS.resultsList.innerHTML = '<li>No items meet buy criteria</li>';
+            return;
+        }
+        const item = candidates[Math.floor(Math.random() * candidates.length)];
+        ELEMENTS.resultsList.innerHTML = `<li>${Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`).join('<br>')}</li>`;
+        state.searchHistory.unshift(`随机: ${item['策略'] || item['股票代码']}`);
+        this.updateHistory();
+    },
+
+    const typeLines = (lines, element) => {
+        if (!element || !lines) return;
         element.innerHTML = '';
         let lineIndex = 0;
-        let charIndex = 0;
 
-        function typeNext() {
-            if (lineIndex < lines.length) {
-                const lineDivs = element.querySelectorAll('.line');
-                let currentLine = lineDivs[lineIndex];
-                if (!currentLine) {
-                    currentLine = document.createElement('div');
-                    currentLine.className = 'line';
-                    element.appendChild(currentLine);
-                }
-                const lineContent = lines[lineIndex] || '';
-                if (charIndex < lineContent.length) {
-                    currentLine.innerHTML = lineContent.slice(0, charIndex + 1);
-                    charIndex++;
-                    setTimeout(typeNext, 20);
-                    element.scrollTop = element.scrollHeight;
+        const typeNextLine = () => {
+            if (lineIndex >= lines.length) return;
+            const line = document.createElement('div');
+            line.className = 'line';
+            element.appendChild(line);
+            let charIndex = 0;
+            const content = lines[lineIndex] || '';
+            const typeChar = () => {
+                if (charIndex < content.length) {
+                    line.innerHTML = content.slice(0, ++charIndex);
+                    requestAnimationFrame(typeChar);
                 } else {
-                    charIndex = 0;
                     lineIndex++;
-                    setTimeout(typeNext, 300);
+                    setTimeout(typeNextLine, 300);
                 }
-            }
-        }
-        typeNext();
-    }
-
-    function updateHistory() {
-        historyList.innerHTML = '';
-        window.searchHistory.slice(0, 10).forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = item;
-            li.addEventListener('click', () => {
-                searchInput.value = item;
-                PeekXAuth.search();
-            });
-            historyList.appendChild(li);
-        });
-    }
-
-    async function hashPassword(password) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password);
-        const hash = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function generateToken(username) {
-        const salt = crypto.randomUUID();
-        const payload = { username, exp: Date.now() + 3600000, salt }; // 1小时有效期
-        localStorage.setItem('salt', salt);
-        return btoa(JSON.stringify(payload));
-    }
-
-    function isMembershipValid(expiryDate) {
-        const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        const expiry = new Date(expiryDate);
-        return expiry.getTime() > currentDate.getTime() && !isNaN(expiry.getTime());
-    }
-
-    function sanitizeInput(input) {
-        return input.replace(/[<>&;"]/g, '');
-    }
-
-    function verifyToken(token) {
-        if (!token) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('salt');
-            return false;
-        }
-        try {
-            let payload;
-            if (token.includes('.')) {
-                const [, payloadBase64] = token.split('.');
-                payload = JSON.parse(atob(payloadBase64));
-                payload.exp = payload.exp * 1000;
-            } else {
-                payload = JSON.parse(atob(token));
-            }
-
-            if (!payload.exp || payload.exp < Date.now()) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('salt');
-                return false;
-            }
-
-            if (!token.includes('.')) {
-                const storedSalt = localStorage.getItem('salt');
-                if (!payload.salt || payload.salt !== storedSalt) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('salt');
-                    return false;
-                }
-            }
-            return true;
-        } catch (error) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('salt');
-            return false;
-        }
-    }
-
-    async function loadUserData(username) {
-        try {
-            const response = await fetch(`/noise/assets/obfuscate/${username}.json`);
-            if (response.status === 404) return false;
-            if (!response.ok) throw new Error(`Failed to fetch /noise/assets/obfuscate/${username}.json`);
-            const encryptedData = await response.text();
-            const decodedData = decodeBase64UTF8(encryptedData);
-            userData = JSON.parse(decodedData);
-            return userData;
-        } catch (error) {
-            console.error('加载用户数据失败:', error);
-            return false;
-        }
-    }
-
-    const PeekXAuth = {
-        async login(event) {
-            event.preventDefault();
-            const email = sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
-            const password = sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
-
-            const supabaseClient = getSupabaseClient();
-            let supabaseSuccess = false;
-
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
-
-                    if (!error && data.user) {
-                        const expiryDate = data.user.user_metadata?.expiry_date;
-                        if (!expiryDate || !isMembershipValid(expiryDate)) {
-                            alert('您的会员已过期或未设置有效期，请续费');
-                            localStorage.setItem('expiredEmail', email);
-                            setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
-                            return false;
-                        }
-                        localStorage.setItem('session', JSON.stringify(data.session));
-                        localStorage.setItem('token', data.session.access_token);
-                        storage.setItem("isLoggedIn", "true");
-                        container.classList.add('hidden');
-                        searchPage.classList.add('is-active');
-                        alert('登录成功（Supabase），欢迎回来！');
-                        loadJSONData();
-                        loadCorpus();
-                        supabaseSuccess = true;
-                        return true;
-                    } else {
-                        console.warn('Supabase 登录失败:', error?.message);
-                    }
-                } catch (err) {
-                    console.error('Supabase 登录错误:', err);
-                }
-            } else {
-                console.warn('Supabase 客户端未初始化，跳过 Supabase 验证');
-            }
-
-            if (!supabaseSuccess) {
-                const userData = await loadUserData(email);
-                if (!userData) {
-                    alert('用户不存在或网络错误');
-                    return false;
-                }
-
-                const hashedPassword = await hashPassword(password);
-                if (userData.username === email && userData.password === hashedPassword) {
-                    const expiryDate = userData.expiry_date;
-                    if (!expiryDate || !isMembershipValid(expiryDate)) {
-                        alert('您的会员已过期或未设置有效期，请续费');
-                        localStorage.setItem('expiredEmail', email);
-                        setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
-                        return false;
-                    }
-                    const token = generateToken(email);
-                    localStorage.setItem('token', token);
-                    storage.setItem("isLoggedIn", "true");
-                    container.classList.add('hidden');
-                    searchPage.classList.add('is-active');
-                    alert('登录成功（JSON），欢迎回来！');
-                    loadJSONData();
-                    loadCorpus();
-                    return true;
-                } else {
-                    alert('登录失败，请检查邮箱或密码是否正确。');
-                    return false;
-                }
-            }
-        },
-
-        async register(event) {
-            event.preventDefault();
-            const name = sanitizeInput(document.querySelector('.sign-up-container input[type="text"]').value.trim());
-            const email = sanitizeInput(document.querySelector('.sign-up-container input[type="email"]').value.trim());
-            const password = sanitizeInput(document.querySelector('.sign-up-container input[type="password"]').value.trim());
-
-            const supabaseClient = getSupabaseClient();
-            if (!supabaseClient) {
-                alert('Supabase 未加载，无法注册');
-                return false;
-            }
-
-            if (!name || !email || !password) {
-                alert('请完整填写所有必填项。');
-                return false;
-            }
-
-            const expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + 7);
-            const expiryDateString = expiryDate.toISOString().split('T')[0];
-
-            try {
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email,
-                    password,
-                    options: { data: { expiry_date: expiryDateString, full_name: name } }
-                });
-
-                if (error) {
-                    alert('注册失败: ' + error.message);
-                    return false;
-                } else {
-                    alert(data.user 
-                        ? `注册成功！用户 ID: ${data.user.id}，7天有效期已设置: ${expiryDateString}`
-                        : `注册成功，请检查邮箱验证！7天有效期已设置: ${expiryDateString}`);
-                    container.classList.remove('right-panel-active');
-                    return true;
-                }
-            } catch (err) {
-                alert('注册错误: ' + err.message);
-                return false;
-            }
-        },
-
-        async search() {
-            const token = localStorage.getItem('token');
-            if (!verifyToken(token)) {
-                container.classList.remove('hidden');
-                searchPage.classList.remove('is-active');
-                alert('请先登录');
-                return;
-            }
-
-            const query = searchInput.value.trim();
-            if (!query) return;
-
-            resultsList.innerHTML = '';
-
-            const isJSONQuery = query.includes(':') ||
-                (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2 &&
-                    (/\d/.test(query.split(/[，, ]+/)[0]) || /\d/.test(query.split(/[，, ]+/)[1]))) ||
-                /^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) ||
-                /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query) ||
-                /^\d+$/.test(query);
-
-            if (isJSONQuery) {
-                const jsonResult = searchJSON(query);
-                if (jsonResult) {
-                    typeLines(jsonResult, resultsList);
-                    if (!window.searchHistory.includes(query)) {
-                        window.searchHistory.unshift(query);
-                        updateHistory();
-                    }
-                    adjustResultsWidth();
-                    return;
-                }
-            }
-
-            const corpusResult = searchCorpus(query);
-            if (typeof corpusResult !== 'string') {
-                typeLines(['抱歉，查询出错，请稍后再试'], resultsList);
-                return;
-            }
-            const lines = corpusResult.split('\n').filter(line => line.trim());
-            typeLines(lines, resultsList);
-            if (!window.searchHistory.includes(query)) {
-                window.searchHistory.unshift(query);
-                updateHistory();
-            }
-            adjustResultsWidth();
-        },
-
-        logout() {
-            const supabaseClient = getSupabaseClient();
-            if (supabaseClient) {
-                supabaseClient.auth.signOut().catch(err => console.error('Supabase 退出失败:', err));
-            }
-            localStorage.removeItem('token');
-            localStorage.removeItem('salt');
-            storage.removeItem("isLoggedIn");
-            container.classList.remove('hidden');
-            searchPage.classList.remove('is-active');
-            searchHistory.classList.remove('visible');
-            alert('您已成功退出登录，期待您的再次访问。');
-        }
+            };
+            typeChar();
+            element.scrollTop = element.scrollHeight;
+        };
+        typeNextLine();
     };
 
-    function adjustResultsWidth() {
-        const searchBar = document.querySelector('.search-bar');
-        const resultsList = document.querySelector('.search-results ul');
-        if (searchBar && resultsList) {
-            resultsList.style.width = `${searchBar.offsetWidth}px`;
+    updateHistory() {
+        ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, CONFIG.MAX_HISTORY)
+            .map(item => `<li>${item}</li>`).join('');
+        ELEMENTS.historyList.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', () => {
+                ELEMENTS.searchInput.value = li.textContent;
+                PeekXAuth.search();
+            });
+        });
+    }
+};
+
+// 认证与核心逻辑
+const PeekXAuth = {
+    supabaseClient: typeof supabase !== 'undefined' ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null,
+
+    async login(event) {
+        event.preventDefault();
+        const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
+        const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
+
+        if (this.supabaseClient) {
+            try {
+                const { data, error } = await this.supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                const expiryDate = data.user.user_metadata?.expiry_date;
+                if (!utils.isMembershipValid(expiryDate)) {
+                    alert('Your membership has expired. Redirecting to payment...');
+                    localStorage.setItem('expiredEmail', email);
+                    setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
+                    return;
+                }
+                localStorage.setItem('token', data.session.access_token);
+                this.postLogin();
+                alert('Login successful (Supabase)');
+                return;
+            } catch (error) {
+                console.warn('Supabase login failed:', error.message);
+            }
         }
+
+        const user = await dataLoader.loadUserData(email);
+        if (!user) {
+            alert('User not found or network error');
+            return;
+        }
+        if (user.password !== await utils.hashPassword(password)) {
+            alert('Incorrect email or password');
+            return;
+        }
+        if (!utils.isMembershipValid(user.expiry_date)) {
+            alert('Your membership has expired. Redirecting to payment...');
+            localStorage.setItem('expiredEmail', email);
+            setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
+            return;
+        }
+        localStorage.setItem('token', utils.generateToken(email));
+        this.postLogin();
+        alert('Login successful (JSON)');
+    },
+
+    async register(event) {
+        event.preventDefault();
+        if (!this.supabaseClient) {
+            alert('Supabase not loaded, registration unavailable');
+            return;
+        }
+        const name = utils.sanitizeInput(document.querySelector('.sign-up-container input[type="text"]').value.trim());
+        const email = utils.sanitizeInput(document.querySelector('.sign-up-container input[type="email"]').value.trim());
+        const password = utils.sanitizeInput(document.querySelector('.sign-up-container input[type="password"]').value.trim());
+
+        if (!name || !email || !password) {
+            alert('Please fill all required fields');
+            return;
+        }
+
+        const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        try {
+            const { data, error } = await this.supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { expiry_date: expiryDate, full_name: name } }
+            });
+            if (error) throw error;
+            alert(data.user ? `Registered successfully! User ID: ${data.user.id}, expires: ${expiryDate}` : `Registration successful, please verify your email! Expires: ${expiryDate}`);
+            ELEMENTS.container.classList.remove('right-panel-active');
+        } catch (error) {
+            alert(`Registration failed: ${error.message}`);
+        }
+    },
+
+    async search() {
+        if (!utils.verifyToken(localStorage.getItem('token'))) {
+            ELEMENTS.container.classList.remove('hidden');
+            ELEMENTS.searchPage.classList.remove('is-active');
+            alert('Please log in first');
+            return;
+        }
+
+        const query = ELEMENTS.searchInput.value.trim();
+        if (!query) return;
+
+        ELEMENTS.resultsList.innerHTML = '';
+        const isJSONQuery = query.includes(':') || /^[A-Za-z]+\d+$|^\d+[A-Za-z]+$|^\d+$/.test(query) || (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2);
+        const result = isJSONQuery ? search.json(query) : search.corpus(query);
+
+        if (!result) {
+            search.typeLines(['No results found'], ELEMENTS.resultsList);
+            return;
+        }
+        search.typeLines(typeof result === 'string' ? result.split('\n').filter(Boolean) : result, ELEMENTS.resultsList);
+        if (!state.searchHistory.includes(query)) {
+            state.searchHistory.unshift(query);
+            search.updateHistory();
+        }
+        adjustResultsWidth();
+    },
+
+    logout() {
+        if (this.supabaseClient) this.supabaseClient.auth.signOut().catch(err => console.error('Supabase logout failed:', err));
+        localStorage.clear();
+        sessionStorage.clear();
+        ELEMENTS.container.classList.remove('hidden');
+        ELEMENTS.searchPage.classList.remove('is-active');
+        ELEMENTS.searchHistory.classList.remove('visible');
+        alert('Logged out successfully');
+    },
+
+    postLogin() {
+        sessionStorage.setItem('isLoggedIn', 'true');
+        ELEMENTS.container.classList.add('hidden');
+        ELEMENTS.searchPage.classList.add('is-active');
+        dataLoader.loadJSONData();
+        dataLoader.loadCorpus();
     }
+};
 
-    historyButton.addEventListener('click', () => {
-        searchHistory.classList.toggle('visible');
-    });
+// 事件绑定
+document.addEventListener('DOMContentLoaded', () => {
+    ELEMENTS.signUpButton.addEventListener('click', () => ELEMENTS.container.classList.add('right-panel-active'));
+    ELEMENTS.signInButton.addEventListener('click', () => ELEMENTS.container.classList.remove('right-panel-active'));
+    ELEMENTS.historyButton.addEventListener('click', () => ELEMENTS.searchHistory.classList.toggle('visible'));
+    ELEMENTS.logoutButton.addEventListener('click', PeekXAuth.logout);
+    ELEMENTS.signInForm.addEventListener('submit', PeekXAuth.login);
+    ELEMENTS.signUpForm.addEventListener('submit', PeekXAuth.register);
+    ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search);
+    ELEMENTS.searchInput.addEventListener('keydown', e => e.key === 'Enter' && PeekXAuth.search());
+    ELEMENTS.randomButton.addEventListener('click', search.random);
 
-    logoutButton.addEventListener('click', PeekXAuth.logout);
-
-    signInForm.addEventListener('submit', PeekXAuth.login);
-
-    signUpForm.addEventListener('submit', PeekXAuth.register);
-
-    signUpButton.addEventListener('click', () => {
-        container.classList.add('right-panel-active');
-    });
-
-    signInButton.addEventListener('click', () => {
-        container.classList.remove('right-panel-active');
-    });
-
-    searchButton.addEventListener('click', PeekXAuth.search);
-
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') PeekXAuth.search();
-    });
-
-    randomButton.addEventListener('click', getRandomBuy);
-
-    if (storage.getItem("isLoggedIn") === "true" && verifyToken(localStorage.getItem('token'))) {
-        container.classList.add('hidden');
-        searchPage.classList.add('is-active');
-        loadJSONData();
-        loadCorpus();
+    if (sessionStorage.getItem('isLoggedIn') === 'true' && utils.verifyToken(localStorage.getItem('token'))) {
+        PeekXAuth.postLogin();
     } else {
-        container.classList.remove('hidden');
-        searchPage.classList.remove('is-active');
+        ELEMENTS.container.classList.remove('hidden');
+        ELEMENTS.searchPage.classList.remove('is-active');
     }
 
-    window.PeekXAuth = PeekXAuth;
-
-    searchButton.addEventListener('click', PeekXAuth.search);
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') PeekXAuth.search();
-    });
-    randomButton.addEventListener('click', getRandomBuy);
-    // 初始调整宽度
     adjustResultsWidth();
-    window.addEventListener('resize', adjustResultsWidth); // 窗口大小变化时调整    
+    window.addEventListener('resize', adjustResultsWidth);
 });
 
-window.handleLogout = function() {
-    const storage = sessionStorage;
-    const container = document.getElementById('auth-container');
-    const searchPage = document.getElementById('search-page');
-    const searchHistory = document.querySelector('.search-history');
-
-    const supabaseClient = supabase?.createClient(
-        'https://xupnsfldgnmeicumtqpp.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro'
-    );
-    if (supabaseClient) {
-        supabaseClient.auth.signOut().catch(err => console.error('Supabase 退出失败:', err));
+// 宽度调整
+function adjustResultsWidth() {
+    if (ELEMENTS.searchBar && ELEMENTS.resultsList) {
+        ELEMENTS.resultsList.style.width = `${ELEMENTS.searchBar.offsetWidth}px`;
     }
+}
 
-    localStorage.removeItem('token');
-    localStorage.removeItem('salt');
-    storage.removeItem("isLoggedIn");
-    container.classList.remove('hidden');
-    searchPage.classList.remove('is-active');
-    searchHistory.classList.remove('visible');
-    alert('您已成功退出登录，期待您的再次访问。');
-};
+// 全局暴露
+window.PeekXAuth = PeekXAuth;
+window.handleLogout = PeekXAuth.logout;
