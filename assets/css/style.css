@@ -151,7 +151,7 @@
     list-style: none;
     padding: 0;
     width: 100%;
-    text-align: center;
+    text-align: left;
 }
 
 .search-results li {
@@ -253,6 +253,7 @@
     border-color: #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
 }
+
 
 /* ================= Auth ================= */
 
