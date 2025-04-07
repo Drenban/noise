@@ -294,37 +294,32 @@ const search = {
         typeNextLine();
     },
     
-    random() {
-        if (!state.workbookData) {
-            this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);
-            return;
-        }
-    
-        if (state.randomCount >= state.maxRandomCount) {
-            this.typeLines([`随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用`], ELEMENTS.resultsList);
-            return;
-        }
-    
-        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');
-        if (!buyCandidates.length) {
-            this.typeLines(['没有符合“买入”策略的股票'], ELEMENTS.resultsList);
-            return;
-        }
-    
-        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];
-        state.randomCount++;
-        localStorage.setItem('randomCount', state.randomCount);
-    
-        const lines = [
-            ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),
-            `<span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>`
-        ];
-    
-        this.typeLines(lines, ELEMENTS.resultsList);
-    
-        state.searchHistory.unshift(`随机: ${item['股票代码']}`);
-        this.updateHistory();
-    },
+    random() {        
+        if (!state.workbookData) {            
+        ELEMENTS.resultsList.innerHTML = '<li>Data not loaded, please try again later</li>';            
+        return;        
+        }            
+        if (state.randomCount >= state.maxRandomCount) {            
+        ELEMENTS.resultsList.innerHTML = `<li>随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用</li>`;            
+        return;        
+        }            
+        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');        
+        if (!buyCandidates.length) {            
+        ELEMENTS.resultsList.innerHTML = '<li>没有符合“买入”策略的股票</li>';            
+        return;        
+        }            
+        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];        
+        state.randomCount++;        
+        localStorage.setItem('randomCount', state.randomCount);            
+        ELEMENTS.resultsList.innerHTML = `
+                    <li>                
+        ${Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`).join('<br>')}
+                        <br><span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>
+                    </li>
+                `;            
+        state.searchHistory.unshift(`随机: ${item['股票代码']}`);        
+        this.updateHistory();    
+        },
     
     updateHistory() {
         ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, CONFIG.MAX_HISTORY)
