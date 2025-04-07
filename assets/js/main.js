@@ -39,6 +39,8 @@ const state = {
     fuse: null,
     searchCache: new Map(),
     searchHistory: []
+    randomCount: Number(localStorage.getItem('randomCount') || 0),
+    maxRandomCount: 5
 };
 
 const utils = {
@@ -261,21 +263,48 @@ const search = {
         }
         return '抱歉，我不太明白您的意思，可以换个说法试试吗？';
     },
-
+    
     random() {
         if (!state.workbookData) {
             ELEMENTS.resultsList.innerHTML = '<li>Data not loaded, please try again later</li>';
             return;
         }
-        const candidates = state.workbookData.filter(row => Number(row['收盘价']) > 10);
-        if (!candidates.length) {
-            ELEMENTS.resultsList.innerHTML = '<li>No items meet buy criteria</li>';
+    
+        if (state.randomCount >= state.maxRandomCount) {
+            ELEMENTS.resultsList.innerHTML = `<li>随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用</li>`;
             return;
         }
-        const item = candidates[Math.floor(Math.random() * candidates.length)];
-        ELEMENTS.resultsList.innerHTML = `<li>${Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`).join('<br>')}</li>`;
-        state.searchHistory.unshift(`随机: ${item['策略'] || item['股票代码']}`);
+    
+        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');
+        if (!buyCandidates.length) {
+            ELEMENTS.resultsList.innerHTML = '<li>没有符合“买入”策略的股票</li>';
+            return;
+        }
+    
+        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];
+        state.randomCount++;
+        localStorage.setItem('randomCount', state.randomCount);
+    
+        ELEMENTS.resultsList.innerHTML = `
+            <li>
+                ${Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`).join('<br>')}
+                <br><span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>
+            </li>
+        `;
+    
+        state.searchHistory.unshift(`随机: ${item['股票代码']}`);
         this.updateHistory();
+    },
+    
+    function resetRandomCount() {
+        state.randomCount = 0;
+        localStorage.setItem('randomCount', 0);
+        console.log('随机次数已重置');
+    },
+    
+    ELEMENTS.resetButton = document.getElementById('reset-random');
+    if (ELEMENTS.resetButton) {
+        ELEMENTS.resetButton.addEventListener('click', resetRandomCount);
     },
 
     typeLines(lines, element) {
