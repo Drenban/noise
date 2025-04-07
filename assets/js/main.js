@@ -291,7 +291,7 @@ const search = {
             let charIndex = 0;
             const content = lines[lineIndex] || '';
             const typeChar = (timestamp, lastTime = 0) => {
-                if (charIndex < content.length && timestamp - lastTime > 20) { // 每 20ms 更新一次
+                if (charIndex < content.length && timestamp - lastTime > 20) {
                     line.innerHTML = content.slice(0, ++charIndex);
                     lastTime = timestamp;
                 }
@@ -328,9 +328,9 @@ const PeekXAuth = {
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
 
-        if (this.supabaseClient) {
+        if (PeekXAuth.supabaseClient) {
             try {
-                const { data, error } = await this.supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await PeekXAuth.supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const expiryDate = data.user.user_metadata?.expiry_date;
                 if (!utils.isMembershipValid(expiryDate)) {
@@ -340,7 +340,7 @@ const PeekXAuth = {
                     return;
                 }
                 localStorage.setItem('token', data.session.access_token);
-                this.postLogin();
+                PeekXAuth.postLogin();
                 alert('Login successful (Supabase)');
                 return;
             } catch (error) {
@@ -364,7 +364,7 @@ const PeekXAuth = {
             return;
         }
         localStorage.setItem('token', utils.generateToken(email));
-        this.postLogin();
+        PeekXAuth.postLogin();
         alert('Login successful (JSON)');
     },
 
