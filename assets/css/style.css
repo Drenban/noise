@@ -66,6 +66,13 @@
     transform: translateY(-2px);
 }
 
+.random-btn button:hover {
+    background: linear-gradient(to right, rgba(255, 80, 80, 0.5) 0%, rgba(255, 80, 80, 0.5) 100%);
+    border-color: #ff9a9a;
+    box-shadow: 0 4px 8px rgba(255, 80, 80, 0.3);
+    transform: translateY(-2px);
+}
+
 #search-page button:active {
     background: #051015;
     border-color: #00ffad;
