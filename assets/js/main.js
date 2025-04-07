@@ -323,7 +323,7 @@ const search = {
 const PeekXAuth = {
     supabaseClient: typeof supabase !== 'undefined' ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null,
 
-    async login(event) {
+    login: async (event) => {
         event.preventDefault();
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
@@ -448,10 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ELEMENTS.signUpButton.addEventListener('click', () => ELEMENTS.container.classList.add('right-panel-active'));
     ELEMENTS.signInButton.addEventListener('click', () => ELEMENTS.container.classList.remove('right-panel-active'));
     ELEMENTS.historyButton.addEventListener('click', () => ELEMENTS.searchHistory.classList.toggle('visible'));
-    ELEMENTS.logoutButton.addEventListener('click', PeekXAuth.logout);
-    ELEMENTS.signInForm.addEventListener('submit', PeekXAuth.login);
-    ELEMENTS.signUpForm.addEventListener('submit', PeekXAuth.register);
-    ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search);
+    ELEMENTS.logoutButton.addEventListener('click', PeekXAuth.logout.bind(PeekXAuth));
+    ELEMENTS.signInForm.addEventListener('submit', PeekXAuth.login.bind(PeekXAuth));
+    ELEMENTS.signUpForm.addEventListener('submit', PeekXAuth.register.bind(PeekXAuth));
+    ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search.bind(PeekXAuth));
     ELEMENTS.searchInput.addEventListener('keydown', e => e.key === 'Enter' && PeekXAuth.search());
     ELEMENTS.randomButton.addEventListener('click', search.random);
 
