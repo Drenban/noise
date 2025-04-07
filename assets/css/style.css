@@ -148,10 +148,12 @@
 }
 
 .search-results ul {
+    font-size: 14px;
     list-style: none;
-    padding: 0;
-    width: 100%;
+    margin: 10px auto 0;
+    padding: 0 15px;
     text-align: left;
+    width: 100%;
 }
 
 .search-results li {
@@ -253,7 +255,6 @@
     border-color: #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
 }
-
 
 /* ================= Auth ================= */
 
