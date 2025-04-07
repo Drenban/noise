@@ -38,7 +38,7 @@ const state = {
     corpus: null,
     fuse: null,
     searchCache: new Map(),
-    searchHistory: []
+    searchHistory: [],
     randomCount: 0,
     maxRandomCount: 5
 };
