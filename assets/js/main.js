@@ -101,10 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        let dataArray = Array.isArray(workbookData)
-            ? workbookData
-            : Object.values(workbookData).flat();
-
         const conditions = {};
         let isSimpleQuery = false;
         let name, age;
