@@ -313,7 +313,10 @@ const search = {
         typeNextLine();
     },
     
-    random() {        
+    random() {
+        console.log('this:', this);
+        console.log('search:', search);
+        console.log('Random called, count before:', state.randomCount);
         if (!state.workbookData) {            
             this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);            
             return;        
@@ -328,7 +331,8 @@ const search = {
             return;        
         }
         const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];        
-        state.randomCount++;        
+        state.randomCount++;
+        console.log('Count after:', state.randomCount);
         localStorage.setItem('randomCount', state.randomCount);
         const lines = [
             ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),            
@@ -486,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ELEMENTS.signUpForm.addEventListener('submit', PeekXAuth.register.bind(PeekXAuth));
     ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search.bind(PeekXAuth));
     ELEMENTS.searchInput.addEventListener('keydown', e => e.key === 'Enter' && PeekXAuth.search());
-    ELEMENTS.randomButton.addEventListener('click', search.random);
+    console.log('Binding random button');
     ELEMENTS.randomButton.addEventListener('click', () => {
         console.log('Random button clicked');
         search.random();
