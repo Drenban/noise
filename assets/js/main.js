@@ -39,7 +39,7 @@ const state = {
     fuse: null,
     searchCache: new Map(),
     searchHistory: []
-    randomCount: Number(localStorage.getItem('randomCount') || 0),
+    randomCount: 0,
     maxRandomCount: 5
 };
 
@@ -296,17 +296,6 @@ const search = {
         this.updateHistory();
     },
     
-    // function resetRandomCount() {
-    //     state.randomCount = 0;
-    //     localStorage.setItem('randomCount', 0);
-    //     console.log('随机次数已重置');
-    // },
-    
-    // ELEMENTS.resetButton = document.getElementById('reset-random');
-    // if (ELEMENTS.resetButton) {
-    //     ELEMENTS.resetButton.addEventListener('click', resetRandomCount);
-    // },
-
     typeLines(lines, element) {
         if (!element || !lines) return;
         element.innerHTML = '';
