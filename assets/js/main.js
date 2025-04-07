@@ -323,14 +323,14 @@ const search = {
 const PeekXAuth = {
     supabaseClient: typeof supabase !== 'undefined' ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null,
 
-    login: async (event) => {
+    async login(event) {
         event.preventDefault();
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
 
-        if (PeekXAuth.supabaseClient) {
+        if (this.supabaseClient) {
             try {
-                const { data, error } = await PeekXAuth.supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await this.supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const expiryDate = data.user.user_metadata?.expiry_date;
                 if (!utils.isMembershipValid(expiryDate)) {
@@ -340,7 +340,7 @@ const PeekXAuth = {
                     return;
                 }
                 localStorage.setItem('token', data.session.access_token);
-                PeekXAuth.postLogin();
+                this.postLogin();
                 alert('Login successful (Supabase)');
                 return;
             } catch (error) {
@@ -364,7 +364,7 @@ const PeekXAuth = {
             return;
         }
         localStorage.setItem('token', utils.generateToken(email));
-        PeekXAuth.postLogin();
+        this.postLogin();
         alert('Login successful (JSON)');
     },
 
