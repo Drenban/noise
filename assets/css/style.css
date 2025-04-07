@@ -44,7 +44,7 @@
 }
 
 /* 通用按钮样式 */
-button {
+#search-page button {
     background: #051015;
     border: 1px solid #00ffad;
     border-radius: 4px;
@@ -59,21 +59,21 @@ button {
     transition: all 0.3s ease;
 }
 
-button:hover {
+#search-page button:hover {
     background: linear-gradient(to right, rgba(0, 255, 173, 0.3) 0%, rgba(0, 255, 173, 0.3) 100%);
     border-color: #c3c3c3;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transform: translateY(-2px);
 }
 
-button:active {
+#search-page button:active {
     background: #051015;
     border-color: #00ffad;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     transform: scale(0.95) translateY(0);
 }
 
-button:focus {
+#search-page button:focus {
     outline: none;
     border-color: #00ffad;
     box-shadow: 0 0 8px rgba(0, 255, 173, 0.6);
@@ -162,10 +162,10 @@ button:focus {
 .search-results ul {
     font-size: 14px;
     list-style: none;
-    margin: 0;
-    padding: 0 40px; /* 左右边距 */
+    margin: 10px auto;
+    padding: 0 10%; /* 左右边距 */
     text-align: left; /* 居中 */
-    width: 100%; /* 改为 100%，由 JS 动态调整 */
+    width: 80%; /* 改为 100%，由 JS 动态调整 */
 }
 
 /* 搜索栏 */
