@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function typeLines(lines, element) {
         if (!element) return;
+        element.innerHTML = '';
         let lineIndex = 0;
         let charIndex = 0;
 
@@ -535,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.searchHistory.unshift(query);
                         updateHistory();
                     }
+                    adjustResultsWidth();
                     return;
                 }
             }
@@ -550,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.searchHistory.unshift(query);
                 updateHistory();
             }
+            adjustResultsWidth();
         },
 
         logout() {
@@ -566,6 +569,18 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('您已成功退出登录，期待您的再次访问。');
         }
     };
+
+    function adjustResultsWidth() {
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.querySelector('.search-btn');
+        const randomButton = document.querySelector('.random-btn');
+        const resultsList = document.getElementById('results-list');
+        
+        if (searchInput && searchButton && randomButton && resultsList) {
+            const totalWidth = searchInput.offsetWidth + searchButton.offsetWidth + randomButton.offsetWidth;
+            resultsList.style.width = `${totalWidth}px`; // 设置结果容器宽度
+        }
+    }
 
     historyButton.addEventListener('click', () => {
         searchHistory.classList.toggle('visible');
@@ -604,6 +619,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.PeekXAuth = PeekXAuth;
+
+    searchButton.addEventListener('click', PeekXAuth.search);
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') PeekXAuth.search();
+    });
+    randomButton.addEventListener('click', getRandomBuy);
+    // 初始调整宽度
+    adjustResultsWidth();
+    window.addEventListener('resize', adjustResultsWidth); // 窗口大小变化时调整    
 });
 
 window.handleLogout = function() {
