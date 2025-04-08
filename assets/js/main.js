@@ -522,8 +522,13 @@ const PeekXAuth = {
         const query = ELEMENTS.searchInput.value.trim();
         if (!query) return;
 
-        const isJSONQuery = query.includes(':') || /^[A-Za-z]+\d+$|^\d+[A-Za-z]+$|^\d+$/.test(query) || (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2);
+        const isJSONQuery = query.includes(':') || 
+                            /^[\u4e00-\u9fa5A-Za-z]+\d+$|^\d+[\u4e00-\u9fa5A-Za-z]+$|^\d+$/.test(query) || 
+                            (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2);
+        console.log('isJSONQuery:', isJSONQuery, '查询:', query);
+
         const result = isJSONQuery ? search.json(query) : search.corpus(query);
+        console.log('查询结果:', result);
 
         if (!result) {
             search.typeLines(['No results found'], ELEMENTS.resultsList);
