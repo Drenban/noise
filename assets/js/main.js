@@ -505,6 +505,9 @@ const PeekXAuth = {
         this.postLogin();
         alert('Login successful (JSON)');
     },
+    postLogin() {
+        console.log('Post-login logic here');
+    },
 
     async register(event) {
         event.preventDefault();
