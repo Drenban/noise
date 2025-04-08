@@ -12,6 +12,7 @@
 import { createClient } from '@supabase/supabase-js';
 import CryptoJS from 'crypto-js';
 let CONFIG = null;
+let supabaseClient = null;
 
 const PASSWORD = import.meta.env.VITE_ENCRYPTION_PASSWORD || 'border-radius: 280185px;';
 const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
@@ -72,6 +73,7 @@ async function initializeConfig() {
     if (!CONFIG) {
         console.error('CONFIG 初始化失败');
         throw new Error('Failed to initialize CONFIG');
+        supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     }
 }
 
