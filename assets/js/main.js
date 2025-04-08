@@ -73,8 +73,9 @@ async function initializeConfig() {
     if (!CONFIG) {
         console.error('CONFIG 初始化失败');
         throw new Error('Failed to initialize CONFIG');
-        supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
     }
+    console.log('Initializing supabaseClient with:', CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    supabaseClient = Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY); // main.js:461
 }
 
 const ELEMENTS = {
