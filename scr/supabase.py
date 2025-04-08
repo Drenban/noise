@@ -219,3 +219,8 @@ SQL Editor {
     SELECT * FROM auth.users WHERE email = 'user@example.com';
     SELECT raw_user_meta_data FROM auth.users WHERE email = '';
 }
+
+CREATE POLICY "Allow anon read" ON storage.objects
+FOR SELECT
+TO anon
+USING (bucket_id = 'config-bucket');
