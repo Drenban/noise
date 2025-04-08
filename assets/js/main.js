@@ -36,7 +36,7 @@ async function decryptSupabaseConfig() {
     }
 }
 
-async function CONFIG() {
+async function loadConfig() {
     const supabaseConfig = await decryptSupabaseConfig();
     if (!supabaseConfig) return null;
 
@@ -69,7 +69,7 @@ async function loadDataFile(filePath) {
 }
 
 async function initializeConfig() {
-    CONFIG = await CONFIG();
+    CONFIG = await loadConfig();
     if (!CONFIG) {
         console.error('CONFIG 初始化失败');
         throw new Error('Failed to initialize CONFIG');
