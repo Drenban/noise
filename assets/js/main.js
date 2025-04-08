@@ -9,8 +9,8 @@
 //     CACHE_LIMIT: 100
 // };
 
-import { createClient } from '@supabase/supabase-js';
-import CryptoJS from 'crypto-js';
+// import { createClient } from '@supabase/supabase-js';
+// import CryptoJS from 'crypto-js';
 let CONFIG = null;
 let supabaseClient = null;
 
