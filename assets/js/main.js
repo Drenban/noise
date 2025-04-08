@@ -51,6 +51,9 @@ async function loadConfig() {
     }
     
     console.log('Creating Supabase client with:', supabaseConfig.SUPABASE_URL);
+    if (!window.Supabase || !window.Supabase.createClient) {
+        throw new Error('Supabase library not loaded correctly');
+    }
     const supabase = createClient(supabaseConfig.SUPABASE_URL, supabaseConfig.SUPABASE_KEY);
     try {
         console.log('Downloading config.json from Supabase config-bucket...');
