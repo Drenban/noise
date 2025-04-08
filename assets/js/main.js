@@ -14,7 +14,7 @@
 let CONFIG = null;
 let supabaseClient = null;
 
-const PASSWORD = import.meta.env.VITE_ENCRYPTION_PASSWORD || 'border-radius: 280185px;';
+const PASSWORD = 'border-radius: 280185px;';
 const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
 
 async function decryptSupabaseConfig() {
