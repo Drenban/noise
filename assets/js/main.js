@@ -215,7 +215,7 @@ const dataLoader = {
 
     async loadUserData(username) {
         try {
-            const response = await loadDataFile(`${CONFIG.USER_DATA_PATH}${username}.json`);
+            const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
             if (response.status === 404) return null;
             if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
             state.userData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
