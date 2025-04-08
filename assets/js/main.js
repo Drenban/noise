@@ -160,77 +160,148 @@ const dataLoader = {
 
 const search = {
     json(query) {
+        // 检查数据是否可用
         if (!state.workbookData) {
             ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
+            console.log('数据不可用：state.workbookData 未加载');
             return null;
         }
+        console.log('数据可用，开始处理查询:', query);
     
+        // 初始化变量
         const conditions = {};
         let isSimpleQuery = false;
         let name, age;
         query = query.trim().toLowerCase();
+        console.log('标准化查询字符串:', query);
     
+        // 查询解析块 1：键值对格式（如 "策略:买入,收盘价:10"）
         if (query.includes(':')) {
+            console.log('检测到键值对格式，开始解析');
             query.split(',').forEach(part => {
                 const [key, value] = part.split(':').map(s => s.trim());
-                if (key && value !== undefined) conditions[key] = value;
+                if (key && value !== undefined) {
+                    conditions[key] = value;
+                    console.log(`解析键值对: ${key} = ${value}`);
+                }
             });
             name = conditions['celv'] || conditions['策略'];
             age = conditions['shoupanjia'] || conditions['收盘价'];
-            if (name && age && Object.keys(conditions).length === 2) isSimpleQuery = true;
-        } else if (/[，, ]/.test(query)) {
+            console.log('提取结果: name =', name, ', age =', age);
+            if (name && age && Object.keys(conditions).length === 2) {
+                isSimpleQuery = true;
+                console.log('确认为简单查询，条件数:', Object.keys(conditions).length);
+            }
+        }
+        // 查询解析块 2：带分隔符格式（如 "10，买入", "买入 10"）
+        else if (/[，, ]/.test(query)) {
+            console.log('检测到分隔符格式，开始解析');
             const parts = query.split(/[，, ]+/).map(s => s.trim());
+            console.log('分割结果:', parts);
             if (parts.length === 2) {
                 isSimpleQuery = true;
                 [age, name] = /^\d+$/.test(parts[0]) ? [parts[0], parts[1]] : [parts[1], parts[0]];
                 conditions['策略'] = name;
                 conditions['收盘价'] = age;
+                console.log('分隔符查询解析: age =', age, ', name =', name);
+                console.log('条件对象:', conditions);
             }
-        } else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+        }
+        // 查询解析块 3：无分隔符格式（如 "10买入", "买入10"）
+        else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+            console.log('检测到无分隔符格式，开始解析');
             isSimpleQuery = true;
             if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) { // "10买入"
                 age = query.match(/\d+/)[0];
                 name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+                console.log('数字+文字格式: age =', age, ', name =', name);
             } else { // "买入10"
                 name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
                 age = query.match(/\d+/)[0];
+                console.log('文字+数字格式: name =', name, ', age =', age);
             }
             conditions['策略'] = name;
             conditions['收盘价'] = age;
-        } else if (/^\d+$/.test(query)) {
+            console.log('条件对象:', conditions);
+        }
+        // 查询解析块 4：纯数字格式（如 "300221"）
+        else if (/^\d+$/.test(query)) {
             conditions['股票代码'] = query;
-        } else {
+            console.log('检测到纯数字格式，股票代码:', query);
+            console.log('条件对象:', conditions);
+        }
+        // 查询解析块 5：其他模糊查询
+        else {
             conditions[''] = query;
+            console.log('未匹配格式，模糊查询:', query);
+            console.log('条件对象:', conditions);
         }
     
+        // 数据过滤块
+        console.log('开始过滤数据，条件:', conditions);
         const matches = state.workbookData.filter(row => {
-            if (conditions['']) return Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
-            return Object.entries(conditions).every(([key, value]) => {
+            if (conditions['']) {
+                const result = Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
+                console.log('模糊查询行:', row, '匹配结果:', result);
+                return result;
+            }
+            const result = Object.entries(conditions).every(([key, value]) => {
                 const rowValue = String(row[key] || '').toLowerCase();
+                console.log(`检查条件: ${key} = ${value}, 行值: ${rowValue}`);
                 if (!value) return true;
                 if (value.includes('-')) {
                     const [min, max] = value.split('-').map(Number);
                     const numValue = Math.floor(Number(rowValue));
+                    console.log(`范围查询: ${min} <= ${numValue} <= ${max}`);
                     return numValue >= min && numValue <= max;
                 }
-                if (value.startsWith('>')) return Math.floor(Number(rowValue)) > Number(value.slice(1));
-                if (value.startsWith('<')) return Math.floor(Number(rowValue)) < Number(value.slice(1));
-                if (key.toLowerCase() === '收盘价') return Math.floor(Number(rowValue)) === Math.floor(Number(value));
-                return rowValue === value;
+                if (value.startsWith('>')) {
+                    const compare = Math.floor(Number(rowValue)) > Number(value.slice(1));
+                    console.log(`大于查询: ${rowValue} > ${value.slice(1)} -> ${compare}`);
+                    return compare;
+                }
+                if (value.startsWith('<')) {
+                    const compare = Math.floor(Number(rowValue)) < Number(value.slice(1));
+                    console.log(`小于查询: ${rowValue} < ${value.slice(1)} -> ${compare}`);
+                    return compare;
+                }
+                if (key.toLowerCase() === '收盘价') {
+                    const compare = Math.floor(Number(rowValue)) === Math.floor(Number(value));
+                    console.log(`收盘价相等查询: ${rowValue} === ${value} -> ${compare}`);
+                    return compare;
+                }
+                const compare = rowValue === value;
+                console.log(`精确匹配: ${rowValue} === ${value} -> ${compare}`);
+                return compare;
             });
+            console.log('行匹配结果:', row, '->', result);
+            return result;
         });
+        console.log('过滤完成，匹配结果数量:', matches.length);
     
-        if (!matches.length) return null;
+        // 结果处理块
+        if (!matches.length) {
+            console.log('无匹配结果，返回 null');
+            return null;
+        }
     
-        return isSimpleQuery
-            ? [
-                `<span class="field">全部代码:</span><br><span class="value">${matches.map(row => row['股票代码']).filter(Boolean).join(', ')}</span>`,
+        console.log('开始格式化结果，isSimpleQuery:', isSimpleQuery);
+        if (isSimpleQuery) {
+            const codes = matches.map(row => row['股票代码']).filter(Boolean).join(', ');
+            const result = [
+                `<span class="field">全部代码:</span><br><span class="value">${codes}</span>`,
                 `<span class="field">合计:</span> <span class="value">${matches.length}</span>`
-            ]
-            : matches.flatMap((result, index) => [
+            ];
+            console.log('简单查询结果:', result);
+            return result;
+        } else {
+            const result = matches.flatMap((result, index) => [
                 ...Object.entries(result).map(([key, value]) => `<span class="field">${key}:</span> <span class="value">${value}</span>`),
                 ...(index < matches.length - 1 ? ['<hr>'] : [])
             ]);
+            console.log('详细查询结果:', result);
+            return result;
+        }
     },
 
     corpus(query) {
