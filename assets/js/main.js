@@ -164,13 +164,14 @@ const search = {
             ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
             return null;
         }
-
+    
         const conditions = {};
         let isSimpleQuery = false;
         let name, age;
         query = query.trim().toLowerCase();
-
+    
         if (query.includes(':')) {
+            // key:value 形式
             query.split(',').forEach(part => {
                 const [key, value] = part.split(':').map(s => s.trim());
                 if (key && value !== undefined) conditions[key] = value;
@@ -179,59 +180,77 @@ const search = {
             age = conditions['shoupanjia'] || conditions['收盘价'];
             if (name && age && Object.keys(conditions).length === 2) isSimpleQuery = true;
         } else if (/[，, ]/.test(query)) {
-            const parts = query.split(/[，, ]+/).map(s => s.trim());
-            if (parts.length === 2) {
+            // 分隔符分词（含冗余字段时宽容识别）
+            const parts = query.split(/[，, ]+/).map(s => s.trim()).filter(Boolean);
+            const numbers = parts.filter(p => /^\d+$/.test(p));
+            const words = parts.filter(p => /[\u4e00-\u9fa5a-zA-Z]/.test(p));
+            if (numbers.length === 1 && words.length === 1) {
                 isSimpleQuery = true;
-                [age, name] = /^\d+$/.test(parts[0]) ? [parts[0], parts[1]] : [parts[1], parts[0]];
+                [age, name] = [numbers[0], words[0]];
                 conditions['策略'] = name;
                 conditions['收盘价'] = age;
+            } else {
+                parts.forEach(part => {
+                    const [key, value] = part.split(':').map(s => s.trim());
+                    if (key && value !== undefined) conditions[key] = value;
+                });
             }
         } else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+            // 如：均线20 或 20均线
             isSimpleQuery = true;
-            if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) { // "10买入"
-                age = query.match(/\d+/)[0];
-                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-            } else { // "买入10"
-                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-                age = query.match(/\d+/)[0];
-            }
+            name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+            age = query.match(/\d+/)[0];
             conditions['策略'] = name;
             conditions['收盘价'] = age;
         } else if (/^\d+$/.test(query)) {
+            // 纯数字
             conditions['股票代码'] = query;
         } else {
+            // 模糊搜索
             conditions[''] = query;
         }
-
+    
         const matches = state.workbookData.filter(row => {
-            if (conditions['']) return Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
+            if (conditions['']) {
+                return Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
+            }
             return Object.entries(conditions).every(([key, value]) => {
                 const rowValue = String(row[key] || '').toLowerCase();
                 if (!value) return true;
+    
                 if (value.includes('-')) {
                     const [min, max] = value.split('-').map(Number);
                     const numValue = Math.floor(Number(rowValue));
                     return numValue >= min && numValue <= max;
                 }
+    
                 if (value.startsWith('>')) return Math.floor(Number(rowValue)) > Number(value.slice(1));
                 if (value.startsWith('<')) return Math.floor(Number(rowValue)) < Number(value.slice(1));
-                if (key.toLowerCase() === '收盘价') return Math.floor(Number(rowValue)) === Math.floor(Number(value));
+    
+                if (key.toLowerCase() === '收盘价') {
+                    return Math.floor(Number(rowValue)) === Math.floor(Number(value));
+                }
+    
                 return rowValue === value;
             });
         });
-
-        if (!matches.length) return null;
-
+    
+        if (!matches.length) {
+            ELEMENTS.resultsList.innerHTML = '<li>未找到匹配项，请检查输入条件</li>';
+            return null;
+        }
+    
         return isSimpleQuery
             ? [
                 `<span class="field">全部代码:</span><br><span class="value">${matches.map(row => row['股票代码']).filter(Boolean).join(', ')}</span>`,
                 `<span class="field">合计:</span> <span class="value">${matches.length}</span>`
             ]
             : matches.flatMap((result, index) => [
-                ...Object.entries(result).map(([key, value]) => `<span class="field">${key}:</span> <span class="value">${value}</span>`),
+                ...Object.entries(result).map(([key, value]) =>
+                    `<span class="field">${key}:</span> <span class="value">${value}</span>`),
                 ...(index < matches.length - 1 ? ['<hr>'] : [])
             ]);
-    },
+    }
 
     corpus(query) {
         if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
