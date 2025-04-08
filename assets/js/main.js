@@ -14,7 +14,7 @@
 let CONFIG = null;
 let supabaseClient = null;
 
-const PASSWORD = 'border-radius: 280185px;';
+const PASSWORD = window.ENCRYPTION_PASSWORD || 'border-radius: 280185px;';
 const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
 
 async function decryptSupabaseConfig() {
@@ -43,8 +43,8 @@ async function decryptSupabaseConfig() {
     }
 }
 
-async function loadConfig() {
-    const supabaseConfig = await decryptSupabaseConfig();
+async function loadConfig(supabaseConfig) {
+    // const supabaseConfig = await decryptSupabaseConfig();
     if (!supabaseConfig) {
         console.error('supabaseConfig is null');
         return null;
@@ -65,7 +65,7 @@ async function loadConfig() {
         const configText = await data.text();
         const config = JSON.parse(configText);
         console.log('成功加载 CONFIG:', config);
-        return config;
+        return { ...config, supabase };
     } catch (error) {
         console.error('加载 CONFIG 失败:', error);
         return null;
@@ -86,12 +86,16 @@ async function loadDataFile(filePath) {
 async function initializeConfig() {
     try {
         console.log('Starting CONFIG initialization...');
-        CONFIG = await loadConfig();
-        if (!CONFIG) {
+        const supabaseConfig = await decryptSupabaseConfig();
+        const result = await loadConfig(supabaseConfig);
+        // CONFIG = await loadConfig();
+        if (!result) {
             console.error('CONFIG 初始化失败: loadConfig returned null');
             throw new Error('Failed to initialize CONFIG');
         }
-        supabaseClient = window.Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        CONFIG = result; // 包含 config.json 的内容
+        supabaseClient = result.supabase; // 使用已创建的客户端
+        // supabaseClient = window.Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         console.log('CONFIG and supabaseClient initialized successfully:', CONFIG);
     } catch (error) {
         console.error('initializeConfig failed:', error);
