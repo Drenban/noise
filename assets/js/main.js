@@ -647,7 +647,8 @@ function adjustResultsWidth() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+// 等待页面加载完成后再初始化
+window.addEventListener('load', async () => {
     try {
         await initializeConfig();
         console.log('CONFIG initialized:', CONFIG);
