@@ -675,6 +675,7 @@
         <script src="/noise/assets/js/index.js"></script>
         <script type="module">
             import { createClient } from '/noise/lib/supabase.js';
+            import { GoTrueClient } from '/noise/lib/gotrue.js';
             window.Supabase = { createClient };
             console.log('Supabase loaded:', window.Supabase?.createClient ? 'Yes' : 'No');
         </script>
