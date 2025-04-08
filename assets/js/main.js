@@ -250,7 +250,7 @@ const search = {
                     `<span class="field">${key}:</span> <span class="value">${value}</span>`),
                 ...(index < matches.length - 1 ? ['<hr>'] : [])
             ]);
-    }
+    },
 
     corpus(query) {
         if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
