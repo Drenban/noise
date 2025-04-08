@@ -19,7 +19,9 @@ const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
 
 async function decryptSupabaseConfig() {
     try {
+        console.log('Fetching supabase-config.json...');
         const response = await fetch('/noise/assets/data/supabase-config.json');
+        if (!response.ok) throw new Error(`Failed to fetch supabase-config.json: ${response.status} ${response.statusText}`);
         const { encrypted, iv } = await response.json();
 
         const decrypted = CryptoJS.AES.decrypt(
@@ -39,13 +41,15 @@ async function decryptSupabaseConfig() {
 async function loadConfig() {
     const supabaseConfig = await decryptSupabaseConfig();
     if (!supabaseConfig) return null;
-
+    
+    console.log('Creating Supabase client with:', supabaseConfig.SUPABASE_URL);
     const supabase = createClient(supabaseConfig.SUPABASE_URL, supabaseConfig.SUPABASE_KEY);
     try {
+        console.log('Downloading config.json from Supabase...');
         const { data, error } = await supabase.storage
             .from('config-bucket')
             .download('config.json');
-        if (error) throw error;
+        if (error) throw new Error(`Supabase download error: ${error.message}`);
 
         const configText = await data.text();
         const config = JSON.parse(configText);
@@ -69,13 +73,19 @@ async function loadDataFile(filePath) {
 }
 
 async function initializeConfig() {
-    CONFIG = await loadConfig();
-    if (!CONFIG) {
-        console.error('CONFIG 初始化失败');
-        throw new Error('Failed to initialize CONFIG');
+    try {
+        console.log('Starting CONFIG initialization...');
+        CONFIG = await loadConfig();
+        if (!CONFIG) {
+            console.error('CONFIG 初始化失败: loadConfig returned null');
+            throw new Error('Failed to initialize CONFIG');
+        }
+        supabaseClient = Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        console.log('CONFIG and supabaseClient initialized successfully');
+    } catch (error) {
+        console.error('initializeConfig failed:', error);
+        throw error;
     }
-    console.log('Initializing supabaseClient with:', CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-    supabaseClient = Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY); // main.js:461
 }
 
 const ELEMENTS = {
@@ -214,7 +224,12 @@ const dataLoader = {
     },
 
     async loadUserData(username) {
+        if (!CONFIG) {
+            console.error('CONFIG 未初始化，无法加载用户数据');
+            return null;
+        }
         try {
+            console.log(`Loading user data from: ${CONFIG.USER_DATA_PATH}/${email}.json`);
             const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
             if (response.status === 404) return null;
             if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
@@ -463,11 +478,15 @@ const PeekXAuth = {
 
     async login(event) {
         event.preventDefault();
+        console.log('Login attempt started');
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
 
-        if (supabaseClient) {
+        if (!CONFIG || !supabaseClient) {
+            console.error('CONFIG 或 supabaseClient 未初始化，跳过 Supabase 登录');
+        } else {
             try {
+                console.log('Attempting Supabase login...');
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const expiryDate = data.user.user_metadata?.expiry_date;
