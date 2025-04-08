@@ -34,6 +34,38 @@ async function decryptSupabaseConfig() {
     }
 }
 
+async function CONFIG() {
+    const supabaseConfig = await decryptSupabaseConfig();
+    if (!supabaseConfig) return null;
+
+    const supabase = createClient(supabaseConfig.SUPABASE_URL, supabaseConfig.SUPABASE_KEY);
+    try {
+        const { data, error } = await supabase.storage
+            .from('config-bucket')
+            .download('config.json');
+        if (error) throw error;
+
+        const configText = await data.text();
+        const config = JSON.parse(configText);
+        console.log('成功加载 CONFIG:', config);
+        return config;
+    } catch (error) {
+        console.error('加载 CONFIG 失败:', error);
+        return null;
+    }
+}
+
+async function loadDataFile(filePath) {
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(`加载文件 ${filePath} 失败:`, error);
+        return null;
+    }
+}
+
 const ELEMENTS = {
     signUpButton: document.getElementById('signUp'),
     signInButton: document.getElementById('signIn'),
