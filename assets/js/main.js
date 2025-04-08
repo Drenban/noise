@@ -1,13 +1,38 @@
-const CONFIG = {
-    SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
-    JSON_DATA_PATH: '/noise/assets/data/data.json',
-    CORPUS_PATH: '/noise/assets/data/corpus.json',
-    USER_DATA_PATH: '/noise/assets/obfuscate/',
-    TOKEN_EXPIRY_MS: 3600000,
-    MAX_HISTORY: 10,
-    CACHE_LIMIT: 100
-};
+// const CONFIG = {
+//     SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
+//     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
+//     JSON_DATA_PATH: '/noise/assets/data/data.json',
+//     CORPUS_PATH: '/noise/assets/data/corpus.json',
+//     USER_DATA_PATH: '/noise/assets/obfuscate/',
+//     TOKEN_EXPIRY_MS: 3600000,
+//     MAX_HISTORY: 10,
+//     CACHE_LIMIT: 100
+// };
+
+import { createClient } from '@supabase/supabase-js';
+import CryptoJS from 'crypto-js';
+
+const PASSWORD = import.meta.env.VITE_ENCRYPTION_PASSWORD || 'border-radius: 280185px;';
+const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
+
+async function decryptSupabaseConfig() {
+    try {
+        const response = await fetch('/noise/assets/data/supabase-config.json');
+        const { encrypted, iv } = await response.json();
+
+        const decrypted = CryptoJS.AES.decrypt(
+            encrypted,
+            CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
+            { iv: CryptoJS.enc.Hex.parse(iv) }
+        );
+        const config = JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
+        console.log('解密后的 Supabase 配置:', config);
+        return config;
+    } catch (error) {
+        console.error('解密 supabase-config.json 失败:', error);
+        return null;
+    }
+}
 
 const ELEMENTS = {
     signUpButton: document.getElementById('signUp'),
