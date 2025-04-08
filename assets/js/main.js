@@ -11,6 +11,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import CryptoJS from 'crypto-js';
+let CONFIG = null;
 
 const PASSWORD = import.meta.env.VITE_ENCRYPTION_PASSWORD || 'border-radius: 280185px;';
 const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
@@ -63,6 +64,14 @@ async function loadDataFile(filePath) {
     } catch (error) {
         console.error(`加载文件 ${filePath} 失败:`, error);
         return null;
+    }
+}
+
+async function initializeConfig() {
+    CONFIG = await CONFIG();
+    if (!CONFIG) {
+        console.error('CONFIG 初始化失败');
+        throw new Error('Failed to initialize CONFIG');
     }
 }
 
