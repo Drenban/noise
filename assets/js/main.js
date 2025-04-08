@@ -22,15 +22,20 @@ async function decryptSupabaseConfig() {
         console.log('Fetching supabase-config.json from /noise/assets/data/supabase-config.json');
         const response = await fetch('/noise/assets/data/supabase-config.json');
         if (!response.ok) throw new Error(`Failed to fetch supabase-config.json: ${response.status} ${response.statusText}`);
-        const { encrypted, iv } = await response.json();
-
+        const data = await response.json();
+        console.log('Raw supabase-config.json:', data);
+        const { encrypted, iv } = data;
+        if (!encrypted || !iv) throw new Error('Invalid supabase-config.json format');
+        const encryptedWordArray = CryptoJS.enc.Hex.parse(encrypted);
         const decrypted = CryptoJS.AES.decrypt(
-            encrypted,
+            { ciphertext: encryptedWordArray },
             CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
-            { iv: CryptoJS.enc.Hex.parse(iv) }
+            { iv: CryptoJS.enc.Hex.parse(iv), mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
         );
-        const config = JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
-        console.log('解密后的 Supabase 配置:', config);
+        const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+        if (!decryptedText) throw new Error('Decryption failed: Empty result');
+        const config = JSON.parse(decryptedText);
+        console.log('Decrypted supabase-config:', config);
         return config;
     } catch (error) {
         console.error('解密 supabase-config.json 失败:', error);
