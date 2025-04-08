@@ -1,12 +1,12 @@
 const crypto = require('crypto');
 
 const supabaseConfig = {
-    SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro'
+    SUPABASE_URL: '',
+    SUPABASE_KEY: ''
 };
 
 const algorithm = 'aes-256-cbc';
-const key = crypto.createHash('sha256').update('border-radius: 280185px;').digest();
+const key = crypto.createHash('sha256').update('大漠孤烟直，长河落日圆。').digest();
 const iv = crypto.randomBytes(16);
 
 function encrypt(data) {
