@@ -19,7 +19,7 @@ const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
 
 async function decryptSupabaseConfig() {
     try {
-        console.log('Fetching supabase-config.json...');
+        console.log('Fetching supabase-config.json from /noise/assets/data/supabase-config.json');
         const response = await fetch('/noise/assets/data/supabase-config.json');
         if (!response.ok) throw new Error(`Failed to fetch supabase-config.json: ${response.status} ${response.statusText}`);
         const { encrypted, iv } = await response.json();
@@ -40,12 +40,15 @@ async function decryptSupabaseConfig() {
 
 async function loadConfig() {
     const supabaseConfig = await decryptSupabaseConfig();
-    if (!supabaseConfig) return null;
+    if (!supabaseConfig) {
+        console.error('supabaseConfig is null');
+        return null;
+    }
     
     console.log('Creating Supabase client with:', supabaseConfig.SUPABASE_URL);
     const supabase = createClient(supabaseConfig.SUPABASE_URL, supabaseConfig.SUPABASE_KEY);
     try {
-        console.log('Downloading config.json from Supabase...');
+        console.log('Downloading config.json from Supabase config-bucket...');
         const { data, error } = await supabase.storage
             .from('config-bucket')
             .download('config.json');
@@ -81,7 +84,7 @@ async function initializeConfig() {
             throw new Error('Failed to initialize CONFIG');
         }
         supabaseClient = Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        console.log('CONFIG and supabaseClient initialized successfully');
+        console.log('CONFIG and supabaseClient initialized successfully:', CONFIG);
     } catch (error) {
         console.error('initializeConfig failed:', error);
         throw error;
@@ -636,7 +639,7 @@ function adjustResultsWidth() {
     }
 }
 
-(async () => {
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initializeConfig();
         console.log('CONFIG initialized:', CONFIG);
@@ -644,7 +647,7 @@ function adjustResultsWidth() {
     } catch (error) {
         console.error('程序启动失败:', error);
     }
-})();
+});
 
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
