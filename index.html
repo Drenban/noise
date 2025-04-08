@@ -674,8 +674,8 @@
         <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
         <script src="/noise/assets/js/index.js"></script>
         <script type="module">
-            import { createClient } from '/noise/lib/supabase.js';
-            import { GoTrueClient } from '/noise/lib/gotrue.js';
+            import { createClient } from '@supabase/supabase-js';
+            import { GoTrueClient } from '@supabase/gotrue-js';
             window.Supabase = { createClient };
             console.log('Supabase loaded:', window.Supabase?.createClient ? 'Yes' : 'No');
         </script>
