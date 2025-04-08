@@ -173,12 +173,17 @@ const search = {
         if (query.includes(':')) {
             query.split(',').forEach(part => {
                 const [key, value] = part.split(':').map(s => s.trim());
-                if (key && value !== undefined) conditions[key] = value;
+                if (key && value !== undefined) {
+                    conditions[key] = value;
+                }
             });
             name = conditions['celv'] || conditions['策略'];
             age = conditions['shoupanjia'] || conditions['收盘价'];
-            if (name && age && Object.keys(conditions).length === 2) isSimpleQuery = true;
-        } else if (/[，, ]/.test(query)) {
+            if (name && age && Object.keys(conditions).length === 2) {
+                isSimpleQuery = true;
+            }
+        }
+        else if (/[，, ]/.test(query)) {
             const parts = query.split(/[，, ]+/).map(s => s.trim());
             if (parts.length === 2) {
                 isSimpleQuery = true;
@@ -186,26 +191,32 @@ const search = {
                 conditions['策略'] = name;
                 conditions['收盘价'] = age;
             }
-        } else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+        }
+        else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
             isSimpleQuery = true;
-            if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) { // "10买入"
+            if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
                 age = query.match(/\d+/)[0];
                 name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-            } else { // "买入10"
+            } else {
                 name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
                 age = query.match(/\d+/)[0];
             }
             conditions['策略'] = name;
             conditions['收盘价'] = age;
-        } else if (/^\d+$/.test(query)) {
+        }
+        else if (/^\d+$/.test(query)) {
             conditions['股票代码'] = query;
-        } else {
+        }
+        else {
             conditions[''] = query;
         }
     
         const matches = state.workbookData.filter(row => {
-            if (conditions['']) return Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
-            return Object.entries(conditions).every(([key, value]) => {
+            if (conditions['']) {
+                const result = Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
+                return result;
+            }
+            const result = Object.entries(conditions).every(([key, value]) => {
                 const rowValue = String(row[key] || '').toLowerCase();
                 if (!value) return true;
                 if (value.includes('-')) {
@@ -213,24 +224,42 @@ const search = {
                     const numValue = Math.floor(Number(rowValue));
                     return numValue >= min && numValue <= max;
                 }
-                if (value.startsWith('>')) return Math.floor(Number(rowValue)) > Number(value.slice(1));
-                if (value.startsWith('<')) return Math.floor(Number(rowValue)) < Number(value.slice(1));
-                if (key.toLowerCase() === '收盘价') return Math.floor(Number(rowValue)) === Math.floor(Number(value));
-                return rowValue === value;
+                if (value.startsWith('>')) {
+                    const compare = Math.floor(Number(rowValue)) > Number(value.slice(1));
+                    return compare;
+                }
+                if (value.startsWith('<')) {
+                    const compare = Math.floor(Number(rowValue)) < Number(value.slice(1));
+                    return compare;
+                }
+                if (key.toLowerCase() === '收盘价') {
+                    const compare = Math.floor(Number(rowValue)) === Math.floor(Number(value));
+                    return compare;
+                }
+                const compare = rowValue === value;
+                return compare;
             });
+            return result;
         });
     
-        if (!matches.length) return null;
+        if (!matches.length) {
+            return null;
+        }
     
-        return isSimpleQuery
-            ? [
-                `<span class="field">全部代码:</span><br><span class="value">${matches.map(row => row['股票代码']).filter(Boolean).join(', ')}</span>`,
+        if (isSimpleQuery) {
+            const codes = matches.map(row => row['股票代码']).filter(Boolean).join(', ');
+            const result = [
+                `<span class="field">全部代码:</span><br><span class="value">${codes}</span>`,
                 `<span class="field">合计:</span> <span class="value">${matches.length}</span>`
-            ]
-            : matches.flatMap((result, index) => [
+            ];
+            return result;
+        } else {
+            const result = matches.flatMap((result, index) => [
                 ...Object.entries(result).map(([key, value]) => `<span class="field">${key}:</span> <span class="value">${value}</span>`),
                 ...(index < matches.length - 1 ? ['<hr>'] : [])
             ]);
+            return result;
+        }
     },
     
     corpus(query) {
@@ -449,10 +478,7 @@ const PeekXAuth = {
         const query = ELEMENTS.searchInput.value.trim();
         if (!query) return;
 
-        const isJSONQuery = query.includes(':') || 
-                            /^[\u4e00-\u9fa5A-Za-z]+\d+$|^\d+[\u4e00-\u9fa5A-Za-z]+$|^\d+$/.test(query) || 
-                            (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2);
-
+        const isJSONQuery = query.includes(':') || /^[\u4e00-\u9fa5A-Za-z]+\d+$|^\d+[\u4e00-\u9fa5A-Za-z]+$|^\d+$/.test(query) || (/[，, ]/.test(query) && query.split(/[，, ]+/).length === 2);
         const result = isJSONQuery ? search.json(query) : search.corpus(query);
 
         if (!result) {
