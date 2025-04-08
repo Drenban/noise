@@ -636,5 +636,15 @@ function adjustResultsWidth() {
     }
 }
 
+(async () => {
+    try {
+        await initializeConfig();
+        console.log('CONFIG initialized:', CONFIG);
+        console.log('supabaseClient initialized:', supabaseClient);
+    } catch (error) {
+        console.error('程序启动失败:', error);
+    }
+})();
+
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
