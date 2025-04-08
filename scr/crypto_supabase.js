@@ -1,16 +1,18 @@
 const crypto = require('crypto');
 
+const PASSWORD = '大漠孤烟直，长河落日圆。';
+const ENCRYPTION_KEY = crypto.createHash('sha256').update(PASSWORD).digest();
+
 const supabaseConfig = {
     SUPABASE_URL: '',
     SUPABASE_KEY: ''
 };
 
 const algorithm = 'aes-256-cbc';
-const key = crypto.createHash('sha256').update('大漠孤烟直，长河落日圆。').digest();
 const iv = crypto.randomBytes(16);
 
 function encrypt(data) {
-    const cipher = crypto.createCipheriv(algorithm, Buffer.from(key), iv);
+    const cipher = crypto.createCipheriv(algorithm, Buffer.from(ENCRYPTION_KEY), iv);
     let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
