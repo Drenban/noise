@@ -91,7 +91,7 @@ async function initializeConfig() {
             console.error('CONFIG 初始化失败: loadConfig returned null');
             throw new Error('Failed to initialize CONFIG');
         }
-        supabaseClient = Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+        supabaseClient = window.Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
         console.log('CONFIG and supabaseClient initialized successfully:', CONFIG);
     } catch (error) {
         console.error('initializeConfig failed:', error);
