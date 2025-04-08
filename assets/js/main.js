@@ -176,7 +176,7 @@ const utils = {
 const dataLoader = {
     async loadJSONData() {
         try {
-            const response = await fetch(CONFIG.JSON_DATA_PATH);
+            const response = await loadDataFile(CONFIG.JSON_DATA_PATH);
             if (!response.ok) throw new Error('Failed to load JSON data');
             state.workbookData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             console.log('JSON data loaded');
@@ -188,7 +188,7 @@ const dataLoader = {
 
     async loadCorpus() {
         try {
-            const response = await fetch(CONFIG.CORPUS_PATH);
+            const response = await loadDataFile(CONFIG.CORPUS_PATH);
             if (!response.ok) throw new Error(`Failed to load corpus: ${response.status}`);
             state.corpus = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             state.fuse = new Fuse(state.corpus, {
@@ -212,7 +212,7 @@ const dataLoader = {
 
     async loadUserData(username) {
         try {
-            const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
+            const response = await loadDataFile(`${CONFIG.USER_DATA_PATH}${username}.json`);
             if (response.status === 404) return null;
             if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
             state.userData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
