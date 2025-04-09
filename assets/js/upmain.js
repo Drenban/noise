@@ -56,36 +56,42 @@ async function decryptSupabaseConfig() {
 }
 
 async function loadConfig() {
-    const { data, error } = await supabase.storage.from('config-bucket').download('config.json');
-    if (error) {
-        console.error('Download error:', error);
-        throw new Error(`Download error: ${error.message}`);
-    }
-    console.log('Config downloaded:', data);
-    }
+    // 检查全局配置是否存在
     if (!window.SUPABASE_CONFIG) {
         console.error('SUPABASE_CONFIG is null');
         return null;
     }
+
     const { SUPABASE_URL, SUPABASE_KEY } = window.SUPABASE_CONFIG;
     console.log('Creating Supabase client with:', SUPABASE_URL);
+
     if (!window.supabase?.createClient) {
-    throw new Error('Supabase library not loaded');
+        throw new Error('Supabase library not loaded');
     }
+
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     try {
         console.log('Downloading config.json from Supabase...');
-        const { data, error } = await supabase.storage
+        const { data, error } = await supabase
+            .storage
             .from('config-bucket')
             .download('config.json');
-        if (error) throw new Error(`Download error: ${error.message}`);
+
+        if (error) {
+            console.error("下载失败", error);
+            throw new Error(`Download error: ${error.message}`);
+        }
+
         const configText = await data.text();
         const config = JSON.parse(configText);
+
         console.log('Loaded CONFIG:', config);
+
         return { ...config, supabase };
-    } catch (error) {
-        console.error('Load CONFIG failed:', error);
+
+    } catch (err) {
+        console.error('Load CONFIG failed:', err);
         return null;
     }
 }
