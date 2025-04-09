@@ -1,3 +1,29 @@
+function waitForSupabase(retries = 10, delay = 200) {
+  return new Promise((resolve, reject) => {
+    const tryCheck = () => {
+      if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+        resolve();
+      } else if (retries === 0) {
+        reject(new Error('Supabase library not loaded'));
+      } else {
+        setTimeout(() => tryCheck(--retries), delay);
+      }
+    };
+    tryCheck();
+  });
+}
+
+(async () => {
+  try {
+    await waitForSupabase();
+    console.log("✅ Supabase 已就绪，开始初始化...");
+    initializeConfig(); // 你原来要调用的逻辑
+  } catch (err) {
+    console.error("❌ Supabase 初始化失败：", err);
+  }
+})();
+
+
 let CONFIG = null;
 let supabaseClient = null;
 
