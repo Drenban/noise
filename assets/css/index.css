@@ -3091,3 +3091,34 @@ li.CodeMirror-hint-active {
         fill:#c3c3c3
     }
 }
+
+html.is-mobile .quant {
+    display: block;
+}
+
+@media (max-width: 1440px) {
+    .quant {
+        left: 0;
+        width: 100%;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@media (max-width: 1280px) {
+    .quant {
+        left: 0;
+        width: 100%;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@media (max-width: 1000px) {
+    .quant {
+        left: 0;
+        width: 100%;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
