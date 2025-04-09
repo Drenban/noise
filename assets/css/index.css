@@ -3122,3 +3122,29 @@ html.is-mobile .quant {
         pointer-events: auto;
     }
 }
+
+html.is-mobile .quant,
+html.is-tablet .quant {
+    display: block;
+}
+
+@media (max-width: 1024px) {
+    .quant {
+        left: 0;
+        width: 75%;
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .quant {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .quant {
+        padding: 3em 1.5em 10px;
+    }
+}
