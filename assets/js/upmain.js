@@ -56,6 +56,13 @@ async function decryptSupabaseConfig() {
 }
 
 async function loadConfig() {
+    const { data, error } = await supabase.storage.from('config-bucket').download('config.json');
+    if (error) {
+        console.error('Download error:', error);
+        throw new Error(`Download error: ${error.message}`);
+    }
+    console.log('Config downloaded:', data);
+    }
     if (!window.SUPABASE_CONFIG) {
         console.error('SUPABASE_CONFIG is null');
         return null;
