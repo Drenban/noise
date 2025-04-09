@@ -3102,12 +3102,14 @@ li.CodeMirror-hint-active {
 @media (max-width: 768px) {
     .quant {
         left: 0;
-        width: 50%;
+        width: 100%;
     }
 }
 
 @media (max-width: 480px) {
     .quant {
+        left: 0;
+        width: 100%;
         padding: 3em 1.5em 10px;
     }
 }
