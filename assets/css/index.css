@@ -2761,7 +2761,7 @@ li.CodeMirror-hint-active {
     cursor: pointer
 }
 
-.view-infos,html.is-mobile .menu__item--is-quant,html.is-mobile:not(.is-vr-browser) .menu__item:first-child,html.is-mobile:not(.is-vr-browser) .menu__item:nth-child(2),html.is-vr-browser .menu__item--is-gallery {
+.view-infos,html.is-mobile:not(.is-vr-browser) .menu__item:first-child,html.is-mobile:not(.is-vr-browser) .menu__item:nth-child(2),html.is-vr-browser .menu__item--is-gallery {
     display: none
 }
 
@@ -3092,54 +3092,17 @@ li.CodeMirror-hint-active {
     }
 }
 
-html.is-mobile .quant {
-    display: block;
-}
-
-@media (max-width: 1440px) {
-    .quant {
-        left: 0;
-        width: 100%;
-        opacity: 1;
-        pointer-events: auto;
-    }
-}
-
-@media (max-width: 1280px) {
-    .quant {
-        left: 0;
-        width: 100%;
-        opacity: 1;
-        pointer-events: auto;
-    }
-}
-
-@media (max-width: 1000px) {
-    .quant {
-        left: 0;
-        width: 100%;
-        opacity: 1;
-        pointer-events: auto;
-    }
-}
-
-html.is-mobile .quant,
-html.is-tablet .quant {
-    display: block;
-}
-
 @media (max-width: 1024px) {
     .quant {
         left: 0;
         width: 75%;
-        opacity: 1;
-        pointer-events: auto;
     }
 }
 
 @media (max-width: 768px) {
     .quant {
-        width: 100%;
+        left: 0;
+        width: 50%;
     }
 }
 
