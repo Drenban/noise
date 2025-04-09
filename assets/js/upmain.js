@@ -1,16 +1,3 @@
-// const CONFIG = {
-//     SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
-//     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
-//     JSON_DATA_PATH: '/noise/assets/data/data.json',
-//     CORPUS_PATH: '/noise/assets/data/corpus.json',
-//     USER_DATA_PATH: '/noise/assets/obfuscate/',
-//     TOKEN_EXPIRY_MS: 3600000,
-//     MAX_HISTORY: 10,
-//     CACHE_LIMIT: 100
-// };
-
-// import { createClient } from '@supabase/supabase-js';
-// import CryptoJS from 'crypto-js';
 let CONFIG = null;
 let supabaseClient = null;
 
@@ -34,40 +21,38 @@ async function decryptSupabaseConfig() {
         );
         const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
         if (!decryptedText) throw new Error('Decryption failed: Empty result');
-        const config = JSON.parse(decryptedText);
-        console.log('Decrypted supabase-config:', config);
-        return config;
+        window.SUPABASE_CONFIG = JSON.parse(decryptedText);
+        console.log('Decrypted supabase-config:', window.SUPABASE_CONFIG);
+        return window.SUPABASE_CONFIG;
     } catch (error) {
         console.error('解密 supabase-config.json 失败:', error);
         return null;
     }
 }
 
-async function loadConfig(supabaseConfig) {
-    // const supabaseConfig = await decryptSupabaseConfig();
-    if (!supabaseConfig) {
-        console.error('supabaseConfig is null');
+async function loadConfig() {
+    if (!window.SUPABASE_CONFIG) {
+        console.error('SUPABASE_CONFIG is null');
         return null;
     }
-    
-    console.log('Creating Supabase client with:', supabaseConfig.SUPABASE_URL);
-    if (!window.Supabase || !window.Supabase.createClient) {
-        throw new Error('Supabase library not loaded correctly');
+    const { SUPABASE_URL, SUPABASE_KEY } = window.SUPABASE_CONFIG;
+    console.log('Creating Supabase client with:', SUPABASE_URL);
+    if (!window.Supabase?.createClient) {
+        throw new Error('Supabase library not loaded');
     }
-    const supabase = window.Supabase.createClient(supabaseConfig.SUPABASE_URL, supabaseConfig.SUPABASE_KEY);
+    const supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     try {
-        console.log('Downloading config.json from Supabase config-bucket...');
+        console.log('Downloading config.json from Supabase...');
         const { data, error } = await supabase.storage
             .from('config-bucket')
             .download('config.json');
-        if (error) throw new Error(`Supabase download error: ${error.message}`);
-
+        if (error) throw new Error(`Download error: ${error.message}`);
         const configText = await data.text();
         const config = JSON.parse(configText);
-        console.log('成功加载 CONFIG:', config);
+        console.log('Loaded CONFIG:', config);
         return { ...config, supabase };
     } catch (error) {
-        console.error('加载 CONFIG 失败:', error);
+        console.error('Load CONFIG failed:', error);
         return null;
     }
 }
@@ -86,17 +71,12 @@ async function loadDataFile(filePath) {
 async function initializeConfig() {
     try {
         console.log('Starting CONFIG initialization...');
-        const supabaseConfig = await decryptSupabaseConfig();
-        const result = await loadConfig(supabaseConfig);
-        // CONFIG = await loadConfig();
-        if (!result) {
-            console.error('CONFIG 初始化失败: loadConfig returned null');
-            throw new Error('Failed to initialize CONFIG');
-        }
-        CONFIG = result; // 包含 config.json 的内容
-        supabaseClient = result.supabase; // 使用已创建的客户端
-        // supabaseClient = window.Supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-        console.log('CONFIG and supabaseClient initialized successfully:', CONFIG);
+        await decryptSupabaseConfig();
+        const result = await loadConfig();
+        if (!result) throw new Error('Failed to initialize CONFIG');
+        CONFIG = result;
+        supabaseClient = result.supabase;
+        console.log('CONFIG and supabaseClient initialized:', CONFIG);
     } catch (error) {
         console.error('initializeConfig failed:', error);
         throw error;
