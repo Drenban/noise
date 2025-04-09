@@ -3095,21 +3095,27 @@ li.CodeMirror-hint-active {
 @media (max-width: 1024px) {
     .quant {
         left: 0;
+        opacity: 1;
         width: 75%;
+        pointer-events: auto;
     }
 }
 
 @media (max-width: 768px) {
     .quant {
         left: 0;
+        opacity: 1;
         width: 100%;
+        pointer-events: auto;
     }
 }
 
 @media (max-width: 480px) {
     .quant {
         left: 0;
+        opacity: 1;
         width: 100%;
+        pointer-events: auto;
         padding: 3em 1.5em 10px;
     }
 }
