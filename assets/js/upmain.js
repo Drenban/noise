@@ -1,28 +1,27 @@
-function waitForSupabase(retries = 10, delay = 200) {
-  return new Promise((resolve, reject) => {
-    const tryCheck = () => {
-      if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
-        resolve();
-      } else if (retries === 0) {
-        reject(new Error('Supabase library not loaded'));
-      } else {
-        setTimeout(() => tryCheck(--retries), delay);
-      }
-    };
-    tryCheck();
-  });
-}
+// function waitForSupabase(retries = 10, delay = 200) {
+//   return new Promise((resolve, reject) => {
+//     const tryCheck = () => {
+//       if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
+//         resolve();
+//       } else if (retries === 0) {
+//         reject(new Error('Supabase library not loaded'));
+//       } else {
+//         setTimeout(() => tryCheck(--retries), delay);
+//       }
+//     };
+//     tryCheck();
+//   });
+// }
 
-(async () => {
-  try {
-    await waitForSupabase();
-    console.log("✅ Supabase 已就绪，开始初始化...");
-    initializeConfig(); // 你原来要调用的逻辑
-  } catch (err) {
-    console.error("❌ Supabase 初始化失败：", err);
-  }
-})();
-
+// (async () => {
+//   try {
+//     await waitForSupabase();
+//     console.log("✅ Supabase 已就绪，开始初始化...");
+//     initializeConfig(); // 你原来要调用的逻辑
+//   } catch (err) {
+//     console.error("❌ Supabase 初始化失败：", err);
+//   }
+// })();
 
 let CONFIG = null;
 let supabaseClient = null;
@@ -63,10 +62,11 @@ async function loadConfig() {
     }
     const { SUPABASE_URL, SUPABASE_KEY } = window.SUPABASE_CONFIG;
     console.log('Creating Supabase client with:', SUPABASE_URL);
-    if (!window.Supabase?.createClient) {
-        throw new Error('Supabase library not loaded');
+    if (!window.supabase?.createClient) {
+    throw new Error('Supabase library not loaded');
     }
-    const supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     try {
         console.log('Downloading config.json from Supabase...');
         const { data, error } = await supabase.storage
