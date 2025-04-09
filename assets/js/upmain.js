@@ -56,42 +56,47 @@ async function decryptSupabaseConfig() {
 }
 
 async function loadConfig() {
-    // 检查全局配置是否存在
+    console.log('Step 1: Checking SUPABASE_CONFIG...');
     if (!window.SUPABASE_CONFIG) {
-        console.error('SUPABASE_CONFIG is null');
+        console.error('SUPABASE_CONFIG is null or undefined');
         return null;
     }
-
     const { SUPABASE_URL, SUPABASE_KEY } = window.SUPABASE_CONFIG;
-    console.log('Creating Supabase client with:', SUPABASE_URL);
+    console.log('SUPABASE_CONFIG found:', { SUPABASE_URL, SUPABASE_KEY: SUPABASE_KEY.slice(0, 10) + '...' });
 
+    console.log('Step 2: Checking Supabase library...');
     if (!window.supabase?.createClient) {
+        console.error('Supabase library not loaded or createClient is undefined');
         throw new Error('Supabase library not loaded');
     }
+    console.log('Supabase library loaded successfully');
 
+    console.log('Step 3: Creating Supabase client with:', SUPABASE_URL);
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('Supabase client created:', !!supabase);
 
     try {
-        console.log('Downloading config.json from Supabase...');
-        const { data, error } = await supabase
-            .storage
+        console.log('Step 4: Downloading config.json from Supabase Storage...');
+        const { data, error } = await supabase.storage
             .from('config-bucket')
             .download('config.json');
-
+        
         if (error) {
-            console.error("下载失败", error);
+            console.error('Download failed:', error);
             throw new Error(`Download error: ${error.message}`);
         }
+        console.log('Config downloaded successfully:', data instanceof Blob);
 
+        console.log('Step 5: Parsing config.json content...');
         const configText = await data.text();
+        console.log('Config content:', configText);
         const config = JSON.parse(configText);
+        console.log('Parsed CONFIG:', config);
 
-        console.log('Loaded CONFIG:', config);
-
+        console.log('Step 6: Config loading completed');
         return { ...config, supabase };
-
-    } catch (err) {
-        console.error('Load CONFIG failed:', err);
+    } catch (error) {
+        console.error('Load CONFIG failed:', error);
         return null;
     }
 }
