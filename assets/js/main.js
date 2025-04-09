@@ -1,90 +1,13 @@
-let CONFIG = null;
-let supabaseClient = null;
-
-const PASSWORD = window.ENCRYPTION_PASSWORD || 'mysecretpassword123';
-const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
-
-async function decryptSupabaseConfig() {
-    try {
-        console.log('Fetching supabase-config.json from /noise/assets/data/supabase-config.json');
-        const response = await fetch('/noise/assets/data/supabase-config.json');
-        if (!response.ok) throw new Error(`Failed to fetch supabase-config.json: ${response.status} ${response.statusText}`);
-        const data = await response.json();
-        console.log('Raw supabase-config.json:', data);
-        const { encrypted, iv } = data;
-        if (!encrypted || !iv) throw new Error('Invalid supabase-config.json format');
-        const encryptedWordArray = CryptoJS.enc.Hex.parse(encrypted);
-        const decrypted = CryptoJS.AES.decrypt(
-            { ciphertext: encryptedWordArray },
-            CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
-            { iv: CryptoJS.enc.Hex.parse(iv), mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-        );
-        const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-        if (!decryptedText) throw new Error('Decryption failed: Empty result');
-        const config = JSON.parse(decryptedText);
-        console.log('Decrypted supabase-config:', config);
-        return config;
-    } catch (error) {
-        console.error('解密 supabase-config.json 失败:', error);
-        return null;
-    }
-}
-
-async function loadConfig(supabaseConfig) {
-    if (!supabaseConfig) {
-        console.error('supabaseConfig is null');
-        return null;
-    }
-    
-    console.log('Creating Supabase client with:', supabaseConfig.SUPABASE_URL);
-    if (!window.Supabase || !window.Supabase.createClient) {
-        throw new Error('Supabase library not loaded correctly');
-    }
-    const supabase = window.Supabase.createClient(supabaseConfig.SUPABASE_URL, supabaseConfig.SUPABASE_KEY);
-    try {
-        console.log('Downloading config.json from Supabase config-bucket...');
-        const { data, error } = await supabase.storage
-            .from('config-bucket')
-            .download('config.json');
-        if (error) throw new Error(`Supabase download error: ${error.message}`);
-        const configText = await data.text();
-        const config = JSON.parse(configText);
-        console.log('成功加载 CONFIG:', config);
-        return { ...config, supabase };
-    } catch (error) {
-        console.error('加载 CONFIG 失败:', error);
-        return null;
-    }
-}
-
-async function loadDataFile(filePath) {
-    try {
-        const response = await fetch(filePath);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error(`加载文件 ${filePath} 失败:`, error);
-        return null;
-    }
-}
-
-async function initializeConfig() {
-    try {
-        console.log('Starting CONFIG initialization...');
-        const supabaseConfig = await decryptSupabaseConfig();
-        const result = await loadConfig(supabaseConfig);
-        if (!result) {
-            console.error('CONFIG 初始化失败: loadConfig returned null');
-            throw new Error('Failed to initialize CONFIG');
-        }
-        CONFIG = result;
-        supabaseClient = result.supabase;
-        console.log('CONFIG and supabaseClient initialized successfully:', CONFIG);
-    } catch (error) {
-        console.error('initializeConfig failed:', error);
-        throw error;
-    }
-}
+const CONFIG = {
+    SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
+    JSON_DATA_PATH: '/noise/assets/data/data.json',
+    CORPUS_PATH: '/noise/assets/data/corpus.json',
+    USER_DATA_PATH: '/noise/assets/obfuscate/',
+    TOKEN_EXPIRY_MS: 3600000,
+    MAX_HISTORY: 10,
+    CACHE_LIMIT: 100
+};
 
 const ELEMENTS = {
     signUpButton: document.getElementById('signUp'),
@@ -141,7 +64,7 @@ const utils = {
 
     generateToken(username) {
         const salt = crypto.randomUUID();
-        const payload = { username, exp: Date.now() + (CONFIG?.TOKEN_EXPIRY_MS || 3600000), salt };
+        const payload = { username, exp: Date.now() + CONFIG.TOKEN_EXPIRY_MS, salt };
         localStorage.setItem('salt', salt);
         return btoa(JSON.stringify(payload));
     },
@@ -153,8 +76,14 @@ const utils = {
             return false;
         }
         try {
-            const payload = JSON.parse(atob(token));
-            if (payload.exp < Date.now() || payload.salt !== localStorage.getItem('salt')) {
+            const payload = JSON.parse(atob(token.includes('.') ? token.split('.')[1] : token));
+            const exp = token.includes('.') ? payload.exp * 1000 : payload.exp;
+            if (!exp || exp < Date.now()) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('salt');
+                return false;
+            }
+            if (!token.includes('.') && payload.salt !== localStorage.getItem('salt')) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('salt');
                 return false;
@@ -181,9 +110,9 @@ const utils = {
 const dataLoader = {
     async loadJSONData() {
         try {
-            const data = await loadDataFile(CONFIG.JSON_DATA_PATH);
-            if (!data) throw new Error('Failed to load JSON data');
-            state.workbookData = data; // 假设数据已是 JSON，无需 Base64 解码
+            const response = await fetch(CONFIG.JSON_DATA_PATH);
+            if (!response.ok) throw new Error('Failed to load JSON data');
+            state.workbookData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             console.log('JSON data loaded');
         } catch (error) {
             console.error('Load JSON failed:', error);
@@ -193,9 +122,9 @@ const dataLoader = {
 
     async loadCorpus() {
         try {
-            const data = await loadDataFile(CONFIG.CORPUS_PATH);
-            if (!data) throw new Error('Failed to load corpus');
-            state.corpus = data;
+            const response = await fetch(CONFIG.CORPUS_PATH);
+            if (!response.ok) throw new Error(`Failed to load corpus: ${response.status}`);
+            state.corpus = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             state.fuse = new Fuse(state.corpus, {
                 keys: [
                     { name: 'question', weight: 0.5 },
@@ -216,15 +145,11 @@ const dataLoader = {
     },
 
     async loadUserData(username) {
-        if (!CONFIG) {
-            console.error('CONFIG 未初始化，无法加载用户数据');
-            return null;
-        }
         try {
-            console.log(`Loading user data from: ${CONFIG.USER_DATA_PATH}/${username}.json`);
-            const data = await loadDataFile(`${CONFIG.USER_DATA_PATH}/${username}.json`);
-            if (!data) return null;
-            state.userData = data;
+            const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
+            if (response.status === 404) return null;
+            if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
+            state.userData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             return state.userData;
         } catch (error) {
             console.error('Load user data failed:', error);
@@ -239,59 +164,217 @@ const search = {
             ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
             return null;
         }
-        // 保持原有逻辑
-        // ...
+    
+        const conditions = {};
+        let isSimpleQuery = false;
+        let name, age;
+        query = query.trim().toLowerCase();
+    
+        if (query.includes(':')) {
+            query.split(',').forEach(part => {
+                const [key, value] = part.split(':').map(s => s.trim());
+                if (key && value !== undefined) {
+                    conditions[key] = value;
+                }
+            });
+            name = conditions['celv'] || conditions['策略'];
+            age = conditions['shoupanjia'] || conditions['收盘价'];
+            if (name && age && Object.keys(conditions).length === 2) {
+                isSimpleQuery = true;
+            }
+        }
+        else if (/[，, ]/.test(query)) {
+            const parts = query.split(/[，, ]+/).map(s => s.trim());
+            if (parts.length === 2) {
+                isSimpleQuery = true;
+                [age, name] = /^\d+$/.test(parts[0]) ? [parts[0], parts[1]] : [parts[1], parts[0]];
+                conditions['策略'] = name;
+                conditions['收盘价'] = age;
+            }
+        }
+        else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+            isSimpleQuery = true;
+            if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+                age = query.match(/\d+/)[0];
+                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+            } else {
+                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+                age = query.match(/\d+/)[0];
+            }
+            conditions['策略'] = name;
+            conditions['收盘价'] = age;
+        }
+        else if (/^\d+$/.test(query)) {
+            conditions['股票代码'] = query;
+        }
+        else {
+            conditions[''] = query;
+        }
+    
+        const matches = state.workbookData.filter(row => {
+            if (conditions['']) {
+                const result = Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
+                return result;
+            }
+            const result = Object.entries(conditions).every(([key, value]) => {
+                const rowValue = String(row[key] || '').toLowerCase();
+                if (!value) return true;
+                if (value.includes('-')) {
+                    const [min, max] = value.split('-').map(Number);
+                    const numValue = Math.floor(Number(rowValue));
+                    return numValue >= min && numValue <= max;
+                }
+                if (value.startsWith('>')) {
+                    const compare = Math.floor(Number(rowValue)) > Number(value.slice(1));
+                    return compare;
+                }
+                if (value.startsWith('<')) {
+                    const compare = Math.floor(Number(rowValue)) < Number(value.slice(1));
+                    return compare;
+                }
+                if (key.toLowerCase() === '收盘价') {
+                    const compare = Math.floor(Number(rowValue)) === Math.floor(Number(value));
+                    return compare;
+                }
+                const compare = rowValue === value;
+                return compare;
+            });
+            return result;
+        });
+    
+        if (!matches.length) {
+            return null;
+        }
+    
+        if (isSimpleQuery) {
+            const codes = matches.map(row => row['股票代码']).filter(Boolean).join(', ');
+            const result = [
+                `<span class="field">全部代码:</span><br><span class="value">${codes}</span>`,
+                `<span class="field">合计:</span> <span class="value">${matches.length}</span>`
+            ];
+            return result;
+        } else {
+            const result = matches.flatMap((result, index) => [
+                ...Object.entries(result).map(([key, value]) => `<span class="field">${key}:</span> <span class="value">${value}</span>`),
+                ...(index < matches.length - 1 ? ['<hr>'] : [])
+            ]);
+            return result;
+        }
     },
-
+    
     corpus(query) {
         if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
-        // 保持原有逻辑
-        // ...
+        query = query.trim().toLowerCase();
+        if (state.searchCache.has(query)) return state.searchCache.get(query);
+
+        const results = state.fuse.search(query);
+        const bestMatch = results.length && results[0].score < 0.6 ? results[0] : null;
+        const intent = this.detectIntent(query);
+        const answer = this.generateResponse(intent, bestMatch);
+
+        if (state.searchCache.size >= CONFIG.CACHE_LIMIT) state.searchCache.clear();
+        state.searchCache.set(query, answer);
+        return answer;
     },
 
     detectIntent(input) {
-        // 保持原有逻辑
-        // ...
+        const intents = [
+            { name: 'time', patterns: ['时间', '什么时候', '几点', '多久', '啥时候', '何时'], fallback: '您想知道什么的时间？可以告诉我更多细节吗？' },
+            { name: 'price', patterns: ['价格', '多少钱', '费用', '成本', '价位', '花多少'], fallback: '您想了解哪方面的价格？可以具体一点吗？' },
+            { name: 'howto', patterns: ['如何', '怎么', '怎样', '步骤', '方法', '怎么办'], fallback: '您想知道如何做什么？请告诉我具体操作！' },
+            { name: 'psychology', patterns: ['心理', '心态', '情绪', '行为'], fallback: '您想了解交易中的什么心理因素？请具体点！' }
+        ];
+        return intents.find(intent => intent.patterns.some(pattern => input.includes(pattern))) || null;
     },
 
     generateResponse(intent, match) {
-        // 保持原有逻辑
-        // ...
+        if (match) return (1 - match.score).toFixed(2) < 0.5 ? '抱歉，找不到准确答案，您可以换个说法试试！' : match.item.answer.trim();
+        if (intent) {
+            return {
+                time: '我可以帮您查时间相关的信息，您具体想知道什么时间？',
+                price: '价格信息可能因产品不同而异，您想了解哪个产品的价格？',
+                howto: '我可以指导您完成操作，请告诉我您想做什么！'
+            }[intent.name] || intent.fallback || '抱歉，我不太明白您的意思，可以换个说法试试吗？';
+        }
+        return '抱歉，我不太明白您的意思，可以换个说法试试吗？';
     },
 
     typeLines(lines, element) {
-        // 保持原有逻辑
-        // ...
-    },
+        if (!element || !lines) return;
+        if (state.isAnimating) return;
 
+        state.isAnimating = true;
+        ELEMENTS.searchButton.disabled = true;
+        ELEMENTS.randomButton.disabled = true;
+        ELEMENTS.historyButton.disabled = true;
+        ELEMENTS.historyList.querySelectorAll('li').forEach(li => li.style.pointerEvents = 'none');
+
+        element.innerHTML = '';
+        let lineIndex = 0;
+
+        const typeNextLine = () => {
+            if (!state.isAnimating || lineIndex >= lines.length) {
+                state.isAnimating = false;
+                ELEMENTS.searchButton.disabled = false;
+                ELEMENTS.randomButton.disabled = false;
+                ELEMENTS.historyButton.disabled = false;
+                ELEMENTS.historyList.querySelectorAll('li').forEach(li => li.style.pointerEvents = 'auto');
+                return;
+            }
+            const line = document.createElement('div');
+            line.className = 'line';
+            element.appendChild(line);
+            let charIndex = 0;
+            const content = lines[lineIndex] || '';
+            const typeChar = (timestamp, lastTime = 0) => {
+                if (!state.isAnimating) return;
+                if (charIndex < content.length && timestamp - lastTime > 20) {
+                    line.innerHTML = content.slice(0, ++charIndex);
+                    lastTime = timestamp;
+                }
+                if (charIndex < content.length) {
+                    requestAnimationFrame(t => typeChar(t, lastTime));
+                } else {
+                    lineIndex++;
+                    setTimeout(typeNextLine, 300);
+                }
+            };
+            requestAnimationFrame(typeChar);
+            element.scrollTop = element.scrollHeight;
+        };
+        typeNextLine();
+    },
+    
     random() {
+        console.log('this:', this);
+        console.log('search:', search);
         console.log('Random called, count before:', state.randomCount);
-        if (!state.workbookData) {
-            this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);
-            return;
+        if (!state.workbookData) {            
+            this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);            
+            return;        
         }
-        if (state.randomCount >= state.maxRandomCount) {
-            this.typeLines([`随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用`], ELEMENTS.resultsList);
-            return;
+        if (state.randomCount >= state.maxRandomCount) {            
+            this.typeLines([`随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用`], ELEMENTS.resultsList);            
+            return;        
         }
-        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');
-        if (!buyCandidates.length) {
-            this.typeLines(['没有符合“买入”策略的股票'], ELEMENTS.resultsList);
-            return;
+        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');        
+        if (!buyCandidates.length) {            
+            this.typeLines(['没有符合“买入”策略的股票'], ELEMENTS.resultsList);            
+            return;        
         }
-        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];
+        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];        
         state.randomCount++;
         console.log('Count after:', state.randomCount);
         localStorage.setItem('randomCount', state.randomCount);
         const lines = [
-            ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),
-            `<span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>`
+            ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),            
+            `<span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>`        
         ];
         this.typeLines(lines, ELEMENTS.resultsList);
-        state.searchHistory.unshift(`随机: ${item['股票代码']}`);
-        this.updateHistory();
+        state.searchHistory.unshift(`随机: ${item['股票代码']}`);        
+        this.updateHistory();    
     },
-
+    
     updateHistory() {
         ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, CONFIG.MAX_HISTORY)
             .map(item => `<li>${item}</li>`).join('');
@@ -307,18 +390,16 @@ const search = {
 };
 
 const PeekXAuth = {
+    supabaseClient: typeof supabase !== 'undefined' ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null,
+
     async login(event) {
         event.preventDefault();
-        console.log('Login attempt started');
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
 
-        if (!CONFIG || !supabaseClient) {
-            console.error('CONFIG 或 supabaseClient 未初始化，跳过 Supabase 登录');
-        } else {
+        if (this.supabaseClient) {
             try {
-                console.log('Attempting Supabase login...');
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                const { data, error } = await this.supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const expiryDate = data.user.user_metadata?.expiry_date;
                 if (!utils.isMembershipValid(expiryDate)) {
@@ -358,7 +439,7 @@ const PeekXAuth = {
 
     async register(event) {
         event.preventDefault();
-        if (!supabaseClient) {
+        if (!this.supabaseClient) {
             alert('Supabase not loaded, registration unavailable');
             return;
         }
@@ -373,7 +454,7 @@ const PeekXAuth = {
 
         const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         try {
-            const { data, error } = await supabaseClient.auth.signUp({
+            const { data, error } = await this.supabaseClient.auth.signUp({
                 email,
                 password,
                 options: { data: { expiry_date: expiryDate, full_name: name } }
@@ -414,7 +495,7 @@ const PeekXAuth = {
     },
 
     logout() {
-        if (supabaseClient) supabaseClient.auth.signOut().catch(err => console.error('Supabase logout failed:', err));
+        if (this.supabaseClient) this.supabaseClient.auth.signOut().catch(err => console.error('Supabase logout failed:', err));
         localStorage.clear();
         sessionStorage.clear();
         ELEMENTS.container.classList.remove('hidden');
@@ -463,16 +544,6 @@ function adjustResultsWidth() {
         ELEMENTS.resultsList.style.width = `${ELEMENTS.searchBar.offsetWidth}px`;
     }
 }
-
-window.addEventListener('load', async () => {
-    try {
-        await initializeConfig();
-        console.log('CONFIG initialized:', CONFIG);
-        console.log('supabaseClient initialized:', supabaseClient);
-    } catch (error) {
-        console.error('程序启动失败:', error);
-    }
-});
 
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
