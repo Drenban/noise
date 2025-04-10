@@ -3098,4 +3098,8 @@ li.CodeMirror-hint-active {
       width: 100% !important;
       pointer-events: auto;
   }
+  .quant__intro--minimize .quant__intro-description {
+      display: none;
+  }
 }
+
