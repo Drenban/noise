@@ -3109,10 +3109,6 @@ li.CodeMirror-hint-active {
     .quant__intro:not(.is-minimized) {
         max-height: 500px;
     }
-    .quant__intro--minimize {
-        height: 30px;
-        width: 30px;
-    }
     .quant__intro--minimize:before,
     .quant__intro--minimize:after {
         top: 14px;
@@ -3122,5 +3118,44 @@ li.CodeMirror-hint-active {
     .quant__intro--minimize:active {
         border-color: #c3c3c3;
         background-color: rgba(193, 193, 193, 0.2);
+    }
+}
+
+/* 在现有 CSS 文件末尾添加以下代码，不修改任何现有样式 */
+@media (max-width: 1000px) {
+    /* 默认折叠 quant__intro，隐藏 quant__intro-description */
+    .quant__intro {
+        max-height: 2em; /* 默认折叠，仅显示标题和按钮 */
+        transition: max-height 0.3s ease; /* 添加平滑过渡 */
+    }
+
+    /* 点击后展开 */
+    .quant__intro.is-expanded {
+        max-height: 500px; /* 展开状态 */
+    }
+
+    /* 确保 minimize 按钮可点击 */
+    .quant__intro--minimize {
+        pointer-events: auto; /* 强制可点击 */
+        cursor: pointer;
+        height: 30px;
+        width: 30px;
+        z-index: 1; /* 确保不被覆盖 */
+    }
+
+    /* 调整按钮图标：默认显示“展开”状态 */
+    .quant__intro--minimize:after {
+        opacity: 1; /* 默认显示垂直线，表示可展开 */
+    }
+    .quant__intro--minimize:before {
+        opacity: 0; /* 默认隐藏水平线 */
+    }
+
+    /* 展开状态下调整图标 */
+    .quant__intro.is-expanded .quant__intro--minimize:after {
+        opacity: 0; /* 展开时隐藏垂直线 */
+    }
+    .quant__intro.is-expanded .quant__intro--minimize:before {
+        opacity: 1; /* 展开时显示水平线 */
     }
 }
