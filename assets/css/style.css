@@ -593,15 +593,18 @@ social a:active {
 /* ================= mobile ================= */
 
 @media (max-width: 1000px) {
-  .quant {
-      left: 0 !important;
-      width: 100% !important;
-  }
-  .quant__tabs,
-  .quant__buttons,
-  .quant__controls {
-      display: none;
-  }    
+    .quant {
+        left: 0 !important;
+        width: 100% !important;
+    }
+    .quant__tabs,
+    .quant__buttons,
+    .quant__controls {
+        display: none;
+        height: 0;
+        overflow: hidden;
+        visibility: hidden;
+    }
 }
 
 @media (max-width: 1000px) {
