@@ -1,28 +1,3 @@
-// function waitForSupabase(retries = 10, delay = 200) {
-//   return new Promise((resolve, reject) => {
-//     const tryCheck = () => {
-//       if (typeof supabase !== 'undefined' && typeof supabase.createClient === 'function') {
-//         resolve();
-//       } else if (retries === 0) {
-//         reject(new Error('Supabase library not loaded'));
-//       } else {
-//         setTimeout(() => tryCheck(--retries), delay);
-//       }
-//     };
-//     tryCheck();
-//   });
-// }
-
-// (async () => {
-//   try {
-//     await waitForSupabase();
-//     console.log("✅ Supabase 已就绪，开始初始化...");
-//     initializeConfig(); // 你原来要调用的逻辑
-//   } catch (err) {
-//     console.error("❌ Supabase 初始化失败：", err);
-//   }
-// })();
-
 let CONFIG = null;
 let supabaseClient = null;
 
@@ -697,19 +672,6 @@ function adjustResultsWidth() {
         ELEMENTS.resultsList.style.width = `${ELEMENTS.searchBar.offsetWidth}px`;
     }
 }
-
-// // 等待页面加载完成后再初始化
-// window.addEventListener('load', async () => {
-//     try {
-//         await initializeConfig();
-//         console.log('CONFIG initialized:', CONFIG);
-//         console.log('supabaseClient initialized:', supabaseClient);
-//         await postLogin();
-//         console.log('Program started successfully');
-//     } catch (error) {
-//         console.error('程序启动失败:', error);
-//     }
-// });
 
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
