@@ -58,3 +58,36 @@
     console.log("Initial quant__intro classes:", quantIntro.className);
   });
 })();
+
+// auth-mobile.js
+(function () {
+    document.addEventListener("DOMContentLoaded", function () {
+        const authContainer = document.querySelector(".auth-container");
+        const signInContainer = document.querySelector(".sign-in-container");
+        const signUpContainer = document.querySelector(".sign-up-container");
+
+        const isMobile = window.matchMedia("(max-width: 1000px)");
+
+        if (!authContainer || !signInContainer || !signUpContainer) {
+            console.warn("Auth elements not found");
+            return;
+        }
+
+        if (!isMobile.matches) return;
+
+        // 点击导航切换
+        authContainer.addEventListener("click", (e) => {
+            if (e.target === authContainer) {
+                const target = e.offsetY < authContainer.clientHeight / 2 ? signInContainer : signUpContainer;
+                target.scrollIntoView({ behavior: "smooth" });
+            }
+        });
+
+        // 屏幕变化监听
+        isMobile.addEventListener("change", (e) => {
+            if (e.matches) {
+                signInContainer.scrollIntoView({ behavior: "smooth" }); // 默认滚动到登录
+            }
+        });
+    });
+})();
