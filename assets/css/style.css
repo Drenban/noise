@@ -602,7 +602,7 @@ social a:active {
 @media (max-width: 1000px) {
     /* 调整默认折叠高度，确保标题和按钮完整显示 */
     .quant__intro {
-        max-height: 3.5em; /* 增加到 56px，容纳标题和按钮 */
+        max-height: 3em; /* 增加到 56px，容纳标题和按钮 */
         transition: max-height 0.3s ease;
     }
 
@@ -613,14 +613,14 @@ social a:active {
 
     /* 覆盖 :not(.is-minimized) 规则 */
     .quant__intro:not(.is-minimized) {
-        max-height: 3.5em; /* 与默认一致 */
+        max-height: 2em; /* 与默认一致 */
     }
 
     /* 确保按钮完整显示且可点击 */
     .quant__intro--minimize {
         margin-top: 0.5em; /* 减小上边距，适应新高度 */
-        height: 30px;
-        width: 30px;
+        height: 22px;
+        width: 22px;
         pointer-events: auto !important;
         cursor: pointer;
         z-index: 1;
