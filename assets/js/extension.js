@@ -2,7 +2,8 @@
 (function() {
     document.addEventListener("DOMContentLoaded", function() {
         const quant = document.querySelector(".quant");
-        const minimizeBtn = document.querySelector(".button-icon.quant__intro--minimize"); // 更新选择器
+        const quantIntro = document.querySelector(".quant__intro"); // 添加选择
+        const minimizeBtn = document.querySelector(".button-icon.quant__intro--minimize");
 
         const isMobile = window.matchMedia('(max-width: 1000px)').matches;
         if (!isMobile) return;
@@ -14,7 +15,7 @@
         // 初始化状态
         let isExpanded = false;
         quant.classList.remove("is-minimized");
-        quant.classList.remove("is-expanded");
+        quantIntro.classList.remove("is-expanded"); // 确保 quant__intro 默认折叠
         newMinimizeBtn.title = "Show Instruction";
 
         // 强制添加 .is-visible
@@ -27,9 +28,10 @@
         function handleToggle(e) {
             e.preventDefault();
             isExpanded = !isExpanded;
-            quant.classList.toggle("is-expanded", isExpanded);
+            quantIntro.classList.toggle("is-expanded", isExpanded); // 修改为 quant__intro
             newMinimizeBtn.title = isExpanded ? "Hide Instruction" : "Show Instruction";
             console.log("Toggle triggered, isExpanded:", isExpanded);
+            console.log("quant__intro classes:", quantIntro.className);
         }
 
         // 绑定事件
@@ -39,13 +41,13 @@
         // 调试信息
         console.log("quant is-visible:", quant.classList.contains("is-visible"));
         console.log("Button events bound:", newMinimizeBtn.onclick !== null);
-        console.log("Button classes:", newMinimizeBtn.className);
+        console.log("Initial quant__intro classes:", quantIntro.className);
 
         // 屏幕变化监听
         window.matchMedia('(max-width: 1000px)').addEventListener("change", (e) => {
             if (e.matches) {
                 quant.classList.remove("is-minimized");
-                quant.classList.remove("is-expanded");
+                quantIntro.classList.remove("is-expanded");
                 newMinimizeBtn.title = "Show Instruction";
                 isExpanded = false;
                 quant.classList.add("is-visible");
