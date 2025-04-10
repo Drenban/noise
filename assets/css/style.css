@@ -624,3 +624,80 @@ social a:active {
         line-height: 1.2;
     }
 }
+
+@media screen and (max-width: 768px) {
+    html {
+        font-size: 15px;
+    }
+
+    .auth-container,
+    #search-page {
+        padding: 10px;
+    }
+
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .search-body {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .search-history {
+        width: 100% !important;
+        border-right: none;
+        border-bottom: 1px solid #51585b;
+        padding: 10px 0;
+    }
+
+    .search-content {
+        width: 100% !important;
+        align-items: stretch;
+        padding: 10px 0;
+    }
+
+    .search-bar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        position: static;
+    }
+
+    .search-bar input {
+        width: 100%;
+        font-size: 16px;
+    }
+
+    #search-page button {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .search-results ul {
+        padding: 0 10px;
+        width: 100%;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+
+    .form-container form {
+        padding: 0 20px;
+    }
+
+    .form-container input {
+        font-size: 16px;
+    }
+
+    .form-container button {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+}
