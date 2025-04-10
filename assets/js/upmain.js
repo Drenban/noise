@@ -541,19 +541,6 @@ const PeekXAuth = {
         this.postLogin();
         alert('Login successful (JSON)');
     },
-    postLogin() {
-        if (!CONFIG) {
-            console.error('CONFIG 未初始化，跳过 postLogin');
-            ELEMENTS.container.classList.remove('hidden');
-            ELEMENTS.searchPage.classList.remove('is-active');
-            return;
-        }
-        sessionStorage.setItem('isLoggedIn', 'true');
-        ELEMENTS.container.classList.add('hidden');
-        ELEMENTS.searchPage.classList.add('is-active');
-        dataLoader.loadJSONData();
-        dataLoader.loadCorpus();
-    },
 
     async register(event) {
         event.preventDefault();
@@ -625,6 +612,8 @@ const PeekXAuth = {
     postLogin() {
         if (!CONFIG) {
             console.error('CONFIG 未初始化，跳过 postLogin');
+            ELEMENTS.container.classList.remove('hidden');
+            ELEMENTS.searchPage.classList.remove('is-active');
             return;
         }
         console.log('Post-login logic started');
