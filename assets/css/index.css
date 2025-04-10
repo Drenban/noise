@@ -3098,3 +3098,29 @@ li.CodeMirror-hint-active {
       width: 100% !important;
   }
 }
+
+@media (max-width: 1000px) {
+    .quant {
+        padding: 3em 1.5em 10px;
+    }
+    .quant__intro {
+        max-height: 2em;
+    }
+    .quant__intro:not(.is-minimized) {
+        max-height: 500px;
+    }
+    .quant__intro--minimize {
+        height: 30px;
+        width: 30px;
+    }
+    .quant__intro--minimize:before,
+    .quant__intro--minimize:after {
+        top: 14px;
+        left: 8px;
+        width: 10px;
+    }
+    .quant__intro--minimize:active {
+        border-color: #c3c3c3;
+        background-color: rgba(193, 193, 193, 0.2);
+    }
+}
