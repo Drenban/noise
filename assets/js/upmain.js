@@ -623,6 +623,11 @@ const PeekXAuth = {
     },
 
     postLogin() {
+        if (!CONFIG) {
+            console.error('CONFIG 未初始化，跳过 postLogin');
+            return;
+        }
+        console.log('Post-login logic started');
         sessionStorage.setItem('isLoggedIn', 'true');
         ELEMENTS.container.classList.add('hidden');
         ELEMENTS.searchPage.classList.add('is-active');
