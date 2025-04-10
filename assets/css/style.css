@@ -626,17 +626,6 @@ social a:active {
 }
 
 @media (max-width: 1000px) {
-    /* ================= Shader Quant ================= */
-    #shader-quant.is-active {
-        height: 300px; /* 减小高度 */
-        border: 1px solid #51585b;
-        background: #051015;
-    }
-
-    #shader-quant-cm.is-active {
-        height: calc(100% - 30px); /* 调整高度，考虑头部缩小 */
-    }
-
     /* ================= Search Page ================= */
     #search-page {
         font-size: 16px; /* 减小全局字体 */
