@@ -477,14 +477,14 @@ const PeekXAuth = {
                 if (error) throw error;
                 const expiryDate = data.user.user_metadata?.expiry_date;
                 if (!utils.isMembershipValid(expiryDate)) {
-                    alert('Your membership has expired. Redirecting to payment...');
+                    alert('你的会员已过期，正在跳转到付款页面...');
                     localStorage.setItem('expiredEmail', email);
                     setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
                     return;
                 }
                 localStorage.setItem('token', data.session.access_token);
                 this.postLogin();
-                alert('Login successful (Supabase)');
+                alert('登录成功');
                 return;
             } catch (error) {
                 console.warn('Supabase login failed:', error.message);
@@ -493,22 +493,22 @@ const PeekXAuth = {
 
         const user = await dataLoader.loadUserData(email);
         if (!user) {
-            alert('User not found or network error');
+            alert('未找到用户或网络错误');
             return;
         }
         if (user.password !== await utils.hashPassword(password)) {
-            alert('Incorrect email or password');
+            alert('邮箱或密码错误');
             return;
         }
         if (!utils.isMembershipValid(user.expiry_date)) {
-            alert('Your membership has expired. Redirecting to payment...');
+            alert('你的会员已过期，正在跳转到付款页面...');
             localStorage.setItem('expiredEmail', email);
             setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
             return;
         }
         localStorage.setItem('token', utils.generateToken(email));
         this.postLogin();
-        alert('Login successful (JSON)');
+        alert('登录成功');
     },
     postLogin() {
     },
@@ -516,7 +516,7 @@ const PeekXAuth = {
     async register(event) {
         event.preventDefault();
         if (!this.supabaseClient) {
-            alert('Supabase not loaded, registration unavailable');
+            alert('服务器未加载，注册功能不可用');
             return;
         }
         const name = utils.sanitizeInput(document.querySelector('.sign-up-container input[type="text"]').value.trim());
@@ -524,7 +524,7 @@ const PeekXAuth = {
         const password = utils.sanitizeInput(document.querySelector('.sign-up-container input[type="password"]').value.trim());
 
         if (!name || !email || !password) {
-            alert('Please fill all required fields');
+            alert('请填写所有必填字段');
             return;
         }
 
@@ -536,10 +536,10 @@ const PeekXAuth = {
                 options: { data: { expiry_date: expiryDate, full_name: name } }
             });
             if (error) throw error;
-            alert(data.user ? `Registered successfully! User ID: ${data.user.id}, expires: ${expiryDate}` : `Registration successful, please verify your email! Expires: ${expiryDate}`);
+            alert(data.user ? `注册成功！用户 ID: ${data.user.id}, 到期时间: ${expiryDate}` : `注册成功，请验证你的邮箱！到期时间: ${expiryDate}`);
             ELEMENTS.container.classList.remove('right-panel-active');
         } catch (error) {
-            alert(`Registration failed: ${error.message}`);
+            alert(`注册失败: ${error.message}`);
         }
     },
 
@@ -547,7 +547,7 @@ const PeekXAuth = {
         if (!utils.verifyToken(localStorage.getItem('token'))) {
             ELEMENTS.container.classList.remove('hidden');
             ELEMENTS.searchPage.classList.remove('is-active');
-            alert('Please log in first');
+            alert('请先登录');
             return;
         }
 
@@ -577,7 +577,7 @@ const PeekXAuth = {
         ELEMENTS.container.classList.remove('hidden');
         ELEMENTS.searchPage.classList.remove('is-active');
         ELEMENTS.searchHistory.classList.remove('visible');
-        alert('Logged out successfully');
+        alert('已成功登出');
     },
 
     postLogin() {
