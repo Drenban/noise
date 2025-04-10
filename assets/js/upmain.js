@@ -625,14 +625,13 @@ const PeekXAuth = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 先初始化 CONFIG
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         await initializeConfig();
         console.log('CONFIG initialized early in DOMContentLoaded');
     } catch (error) {
         console.error('Early CONFIG initialization failed:', error);
-        ELEMENTS.container.classList.remove('hidden'); // 显示登录界面
+        ELEMENTS.container.classList.remove('hidden');
         return;
     }
     
