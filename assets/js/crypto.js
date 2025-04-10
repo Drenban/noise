@@ -7,11 +7,7 @@ const generatePassword = (length = 32) => {
 
 const PASSWORD = generatePassword();
 const ENCRYPTION_KEY = crypto.createHash('sha256').update(PASSWORD).digest();
-
-const supabaseConfig = {
-  SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
-  SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro'
-};
+const supabaseConfig = window.decryptSupabaseConfig.decryptSupabaseConfig()
 
 const algorithm = 'aes-256-cbc';
 const iv = crypto.randomBytes(16);
