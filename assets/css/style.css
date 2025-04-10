@@ -595,8 +595,9 @@ social a:active {
 @media (max-width: 1000px) {
     .quant {
         left: 0 !important;
+        max-height: 100vh;
+        overflow-y: auto;
         width: 100% !important;
-        height: 100% !important;
     }
     .quant__tabs,
     .quant__buttons,
