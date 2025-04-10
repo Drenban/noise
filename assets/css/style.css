@@ -601,8 +601,7 @@ social a:active {
     }
     .quant__tabs,
     .quant__buttons,
-    .quant__controls,
-    #shader-quant-cm {
+    .quant__controls {
         display: none;
         height: 0;
         overflow: hidden;
