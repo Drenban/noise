@@ -597,6 +597,11 @@ social a:active {
       left: 0 !important;
       width: 100% !important;
   }
+  .quant__tabs,
+  .quant__buttons,
+  .quant__controls {
+      display: none;
+  }    
 }
 
 @media (max-width: 1000px) {
