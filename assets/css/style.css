@@ -797,7 +797,7 @@ social a:active {
     .auth-container.right-panel-active .sign-up-container,
     .auth-container.right-panel-active .overlay-container,
     .auth-container.right-panel-active .overlay {
-        transform: none;
+/*         transform: none; */
         opacity: 1;
     }
 
