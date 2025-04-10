@@ -6,11 +6,9 @@ const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
 
 async function decryptSupabaseConfig() {
     try {
-        console.log('Fetching supabase-config.json from /noise/assets/data/supabase-config.json');
         const response = await fetch('/noise/assets/data/supabase-config.json');
         if (!response.ok) throw new Error(`Failed to fetch supabase-config.json: ${response.status} ${response.statusText}`);
         const data = await response.json();
-        console.log('Raw supabase-config.json:', data);
         const { encrypted, iv } = data;
         if (!encrypted || !iv) throw new Error('Invalid supabase-config.json format');
         const encryptedWordArray = CryptoJS.enc.Hex.parse(encrypted);
@@ -22,7 +20,6 @@ async function decryptSupabaseConfig() {
         const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
         if (!decryptedText) throw new Error('Decryption failed: Empty result');
         window.SUPABASE_CONFIG = JSON.parse(decryptedText);
-        console.log('Decrypted supabase-config:', window.SUPABASE_CONFIG);
         return window.SUPABASE_CONFIG;
     } catch (error) {
         console.error('解密 supabase-config.json 失败:', error);
@@ -31,27 +28,20 @@ async function decryptSupabaseConfig() {
 }
 
 async function loadConfig() {
-    console.log('Step 1: Checking SUPABASE_CONFIG...');
     if (!window.SUPABASE_CONFIG) {
         console.error('SUPABASE_CONFIG is null or undefined');
         return null;
     }
     const { SUPABASE_URL, SUPABASE_KEY } = window.SUPABASE_CONFIG;
-    console.log('SUPABASE_CONFIG found:', { SUPABASE_URL, SUPABASE_KEY: SUPABASE_KEY.slice(0, 10) + '...' });
 
-    console.log('Step 2: Checking Supabase library...');
     if (!window.supabase?.createClient) {
         console.error('Supabase library not loaded or createClient is undefined');
         throw new Error('Supabase library not loaded');
     }
-    console.log('Supabase library loaded successfully');
 
-    console.log('Step 3: Creating Supabase client with:', SUPABASE_URL);
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log('Supabase client created:', !!supabase);
 
     try {
-        console.log('Step 4: Downloading config.json from Supabase Storage...');
         const { data, error } = await supabase.storage
             .from('config-bucket')
             .download('config.json');
@@ -60,15 +50,10 @@ async function loadConfig() {
             console.error('Download failed:', error);
             throw new Error(`Download error: ${error.message}`);
         }
-        console.log('Config downloaded successfully:', data instanceof Blob);
 
-        console.log('Step 5: Parsing config.json content...');
         const configText = await data.text();
-        console.log('Config content:', configText);
         const config = JSON.parse(configText);
-        console.log('Parsed CONFIG:', config);
 
-        console.log('Step 6: Config loading completed');
         return { ...config, supabase };
     } catch (error) {
         console.error('Load CONFIG failed:', error);
@@ -89,13 +74,11 @@ async function loadDataFile(filePath) {
 
 async function initializeConfig() {
     try {
-        console.log('Starting CONFIG initialization...');
         await decryptSupabaseConfig();
         const result = await loadConfig();
         if (!result) throw new Error('Failed to initialize CONFIG');
         CONFIG = result;
         supabaseClient = result.supabase;
-        console.log('CONFIG and supabaseClient initialized:', CONFIG);
     } catch (error) {
         console.error('initializeConfig failed:', error);
         throw error;
@@ -206,7 +189,6 @@ const dataLoader = {
             const response = await fetch(CONFIG.JSON_DATA_PATH);
             if (!response.ok) throw new Error('Failed to load JSON data');
             state.workbookData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
-            console.log('JSON data loaded');
         } catch (error) {
             console.error('Load JSON failed:', error);
             ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
@@ -231,7 +213,6 @@ const dataLoader = {
                 minMatchCharLength: 2,
                 shouldSort: true
             });
-            console.log('Corpus loaded');
         } catch (error) {
             console.error('Load corpus failed:', error);
         }
@@ -243,7 +224,6 @@ const dataLoader = {
             return null;
         }
         try {
-            console.log(`Loading user data from: ${CONFIG.USER_DATA_PATH}/${email}.json`);
             const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
             if (response.status === 404) return null;
             if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
@@ -444,29 +424,25 @@ const search = {
     },
     
     random() {
-        console.log('this:', this);
-        console.log('search:', search);
-        console.log('Random called, count before:', state.randomCount);
-        if (!state.workbookData) {            
-            this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);            
-            return;        
+        if (!state.workbookData) {
+            this.typeLines(['Data not loaded, please try again later'], ELEMENTS.resultsList);
+            return;
         }
-        if (state.randomCount >= state.maxRandomCount) {            
-            this.typeLines([`随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用`], ELEMENTS.resultsList);            
-            return;        
+        if (state.randomCount >= state.maxRandomCount) {
+            this.typeLines([`随机策略已达上限 (${state.maxRandomCount}/${state.maxRandomCount})，无法继续使用`], ELEMENTS.resultsList);
+            return;
         }
-        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');        
-        if (!buyCandidates.length) {            
-            this.typeLines(['没有符合“买入”策略的股票'], ELEMENTS.resultsList);            
-            return;        
+        const buyCandidates = state.workbookData.filter(row => row['策略'] === '买入');
+        if (!buyCandidates.length) {
+            this.typeLines(['没有符合“买入”策略的股票'], ELEMENTS.resultsList);
+            return;
         }
-        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];        
+        const item = buyCandidates[Math.floor(Math.random() * buyCandidates.length)];
         state.randomCount++;
-        console.log('Count after:', state.randomCount);
         localStorage.setItem('randomCount', state.randomCount);
         const lines = [
-            ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),            
-            `<span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>`        
+            ...Object.entries(item).map(([k, v]) => `<span class="field">${k}:</span> <span class="value">${v}</span>`),
+            `<span class="field">随机次数:</span> <span class="value">${state.randomCount}/${state.maxRandomCount}</span>`
         ];
         this.typeLines(lines, ELEMENTS.resultsList);
         state.searchHistory.unshift(`随机: ${item['股票代码']}`);        
@@ -488,11 +464,8 @@ const search = {
 };
 
 const PeekXAuth = {
-    // supabaseClient: typeof supabase !== 'undefined' ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null,
-
     async login(event) {
         event.preventDefault();
-        console.log('Login attempt started');
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
 
@@ -500,7 +473,6 @@ const PeekXAuth = {
             console.error('CONFIG 或 supabaseClient 未初始化，跳过 Supabase 登录');
         } else {
             try {
-                console.log('Attempting Supabase login...');
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 const expiryDate = data.user.user_metadata?.expiry_date;
@@ -539,7 +511,6 @@ const PeekXAuth = {
         alert('Login successful (JSON)');
     },
     postLogin() {
-        console.log('Post-login logic here');
     },
 
     async register(event) {
@@ -627,9 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ELEMENTS.signUpForm.addEventListener('submit', PeekXAuth.register.bind(PeekXAuth));
     ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search.bind(PeekXAuth));
     ELEMENTS.searchInput.addEventListener('keydown', e => e.key === 'Enter' && PeekXAuth.search());
-    console.log('Binding random button');
     ELEMENTS.randomButton.addEventListener('click', () => {
-        console.log('Random button clicked');
         search.random();
     });
 
@@ -650,12 +619,9 @@ function adjustResultsWidth() {
     }
 }
 
-// 等待页面加载完成后再初始化
 window.addEventListener('load', async () => {
     try {
         await initializeConfig();
-        console.log('CONFIG initialized:', CONFIG);
-        console.log('supabaseClient initialized:', supabaseClient);
     } catch (error) {
         console.error('程序启动失败:', error);
     }
