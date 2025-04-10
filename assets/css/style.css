@@ -776,13 +776,13 @@ social a:active {
         cursor: pointer;
     }
 
-    .auth-container::before {
+/*     .auth-container::before {
         content: "Sign In";
     }
 
     .auth-container::after {
         content: "Sign Up";
-    }
+    } */
 
     /* 移除切换动画 */
     .auth-container.right-panel-active .sign-in-container,
