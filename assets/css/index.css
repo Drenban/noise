@@ -344,7 +344,7 @@ input[type=text] {
 
 @media (max-width: 1000px) {
     .header__menu {
-        padding:20px
+        padding:15px
     }
 }
 
@@ -395,7 +395,7 @@ input[type=text] {
     .header__menu .header__menu_item--lab {
         width:140px;
         height: 30px;
-        padding: 8px 12px
+        padding: 8px 10px
     }
 
     .menu__item+.menu__item {
