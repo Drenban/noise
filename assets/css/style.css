@@ -500,6 +500,46 @@ button.ghost:focus {
     transform: translateX(20%);
 }
 
+@media screen and (max-width: 1000px) {
+    .auth-container {
+        flex-direction: column;
+    }
+
+    .form-container,
+    .sign-in-container,
+    .sign-up-container,
+    .overlay-container,
+    .overlay-panel,
+    .overlay {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        transform: none !important;
+        opacity: 1 !important;
+        z-index: auto !important;
+        transition: none !important;
+    }
+
+    .overlay-container {
+        display: none; /* 也可以保留，根据你需求决定 */
+    }
+
+    .auth-container.right-panel-active .sign-in-container,
+    .auth-container.right-panel-active .sign-up-container {
+        transform: none;
+    }
+
+    .form-container form {
+        padding: 20px;
+    }
+
+    .auth-container.right-panel-active .overlay,
+    .auth-container.right-panel-active .overlay-left,
+    .auth-container.right-panel-active .overlay-right {
+        transform: none;
+    }
+}
+
 /* ================= Social ================= */
 
 @keyframes bounceIn {
