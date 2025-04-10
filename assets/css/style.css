@@ -640,4 +640,9 @@ social a:active {
         left: 8px;
         width: 10px;
     }
+    #shader-quant-cm {
+        width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
 }
