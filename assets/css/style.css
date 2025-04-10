@@ -646,3 +646,54 @@ social a:active {
         right: 0 !important;
     }
 }
+
+@media (max-width: 1000px) {
+    /* 针对 .button-icon 和 .quant__intro--minimize 的组合 */
+    .button-icon.quant__intro--minimize {
+        padding: 0; /* 移除 padding，避免与固定尺寸冲突 */
+        height: 30px;
+        width: 30px;
+        border: 1px solid #51585b;
+        background: transparent; /* 确保无背景干扰 */
+        pointer-events: auto !important;
+        cursor: pointer;
+        z-index: 10;
+        position: relative;
+        display: block;
+        touch-action: manipulation;
+    }
+
+    /* 调整伪元素位置 */
+    .button-icon.quant__intro--minimize:before,
+    .button-icon.quant__intro--minimize:after {
+        top: 14px;
+        left: 8px;
+        width: 10px;
+        height: 1px;
+        background-color: #51585b;
+        content: '';
+    }
+
+    /* 默认显示“展开”状态 */
+    .button-icon.quant__intro--minimize:after {
+        opacity: 1;
+        transform: rotate(90deg);
+    }
+    .button-icon.quant__intro--minimize:before {
+        opacity: 0;
+    }
+
+    /* 展开时切换图标 */
+    .quant__intro.is-expanded .button-icon.quant__intro--minimize:after {
+        opacity: 0;
+    }
+    .quant__intro.is-expanded .button-icon.quant__intro--minimize:before {
+        opacity: 1;
+    }
+
+    /* 点击反馈 */
+    .button-icon.quant__intro--minimize:active {
+        border-color: #c3c3c3;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+}
