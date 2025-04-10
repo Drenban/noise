@@ -651,8 +651,8 @@ social a:active {
     /* 针对 .button-icon 和 .quant__intro--minimize 的组合 */
     .button-icon.quant__intro--minimize {
         padding: 0; /* 移除 padding，避免与固定尺寸冲突 */
-        height: 30px;
-        width: 30px;
+        height: 22px;
+        width: 22px;
         border: 1px solid #51585b;
         background: transparent; /* 确保无背景干扰 */
         pointer-events: auto !important;
