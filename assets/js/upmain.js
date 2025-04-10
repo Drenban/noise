@@ -4,23 +4,6 @@ let supabaseClient = null;
 const PASSWORD = window.ENCRYPTION_PASSWORD || 'border-radius: 280185px;';
 const ENCRYPTION_KEY = CryptoJS.SHA256(PASSWORD).toString(CryptoJS.enc.Hex);
 
-function waitForSupabase(retries = 10, delay = 200) {
-    return new Promise((resolve, reject) => {
-        const tryCheck = () => {
-            if (typeof window.Supabase !== 'undefined' && typeof window.Supabase.createClient === 'function') {
-                console.log('Supabase UMD loaded');
-                resolve();
-            } else if (retries === 0) {
-                reject(new Error('Supabase library not loaded after retries'));
-            } else {
-                console.log(`Waiting for Supabase, retries left: ${retries}`);
-                setTimeout(() => tryCheck(--retries), delay);
-            }
-        };
-        tryCheck();
-    });
-}
-
 async function decryptSupabaseConfig() {
     try {
         console.log('Fetching supabase-config.json from /noise/assets/data/supabase-config.json');
@@ -105,12 +88,6 @@ async function loadDataFile(filePath) {
 }
 
 async function initializeConfig() {
-    try {
-        await waitForSupabase();
-        console.log('Supabase ready, proceeding with CONFIG initialization');
-    } catch (error) {
-        throw new Error('Supabase library not loaded');
-    }
     try {
         console.log('Starting CONFIG initialization...');
         await decryptSupabaseConfig();
@@ -518,30 +495,28 @@ const PeekXAuth = {
         console.log('Login attempt started');
         const email = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="email"]').value.trim());
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
-        console.log('Login credentials:', { email, password });
 
         if (!CONFIG || !supabaseClient) {
-            console.error('CONFIG 或 supabaseClient 未初始化');
-            alert('System not ready, please try again later');
-            return;
-        }
-        try {
-            console.log('Attempting Supabase login...');
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) throw error;
-            const expiryDate = data.user.user_metadata?.expiry_date;
-            if (!utils.isMembershipValid(expiryDate)) {
-                alert('Your membership has expired. Redirecting to payment...');
-                localStorage.setItem('expiredEmail', email);
-                setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
+            console.error('CONFIG 或 supabaseClient 未初始化，跳过 Supabase 登录');
+        } else {
+            try {
+                console.log('Attempting Supabase login...');
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                const expiryDate = data.user.user_metadata?.expiry_date;
+                if (!utils.isMembershipValid(expiryDate)) {
+                    alert('Your membership has expired. Redirecting to payment...');
+                    localStorage.setItem('expiredEmail', email);
+                    setTimeout(() => window.location.href = '/peekx/payment/index.html', 2000);
+                    return;
+                }
+                localStorage.setItem('token', data.session.access_token);
+                this.postLogin();
+                alert('Login successful (Supabase)');
                 return;
+            } catch (error) {
+                console.warn('Supabase login failed:', error.message);
             }
-            localStorage.setItem('token', data.session.access_token);
-            this.postLogin();
-            alert('Login successful (Supabase)');
-            return;
-        } catch (error) {
-            console.warn('Supabase login failed:', error.message);
         }
 
         const user = await dataLoader.loadUserData(email);
@@ -562,6 +537,9 @@ const PeekXAuth = {
         localStorage.setItem('token', utils.generateToken(email));
         this.postLogin();
         alert('Login successful (JSON)');
+    },
+    postLogin() {
+        console.log('Post-login logic here');
     },
 
     async register(event) {
@@ -632,11 +610,6 @@ const PeekXAuth = {
     },
 
     postLogin() {
-        if (!CONFIG) {
-            console.error('CONFIG 未初始化，跳过 postLogin');
-            return;
-        }
-        console.log('Post-login logic started');
         sessionStorage.setItem('isLoggedIn', 'true');
         ELEMENTS.container.classList.add('hidden');
         ELEMENTS.searchPage.classList.add('is-active');
@@ -645,26 +618,12 @@ const PeekXAuth = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        console.log('DOM content loaded, initializing CONFIG...');
-        await initializeConfig();
-        console.log('CONFIG initialized early in DOMContentLoaded');
-    } catch (error) {
-        console.error('Early CONFIG initialization failed:', error);
-        ELEMENTS.container.classList.remove('hidden');
-        return;
-    }
-    
+document.addEventListener('DOMContentLoaded', () => {
     ELEMENTS.signUpButton.addEventListener('click', () => ELEMENTS.container.classList.add('right-panel-active'));
     ELEMENTS.signInButton.addEventListener('click', () => ELEMENTS.container.classList.remove('right-panel-active'));
     ELEMENTS.historyButton.addEventListener('click', () => ELEMENTS.searchHistory.classList.toggle('visible'));
     ELEMENTS.logoutButton.addEventListener('click', PeekXAuth.logout.bind(PeekXAuth));
-    // ELEMENTS.signInForm.addEventListener('submit', PeekXAuth.login.bind(PeekXAuth));
-    ELEMENTS.signInForm.addEventListener('submit', (event) => {
-        console.log('Sign-in form submitted');
-        PeekXAuth.login(event);
-    });
+    ELEMENTS.signInForm.addEventListener('submit', PeekXAuth.login.bind(PeekXAuth));
     ELEMENTS.signUpForm.addEventListener('submit', PeekXAuth.register.bind(PeekXAuth));
     ELEMENTS.searchButton.addEventListener('click', PeekXAuth.search.bind(PeekXAuth));
     ELEMENTS.searchInput.addEventListener('keydown', e => e.key === 'Enter' && PeekXAuth.search());
@@ -690,6 +649,17 @@ function adjustResultsWidth() {
         ELEMENTS.resultsList.style.width = `${ELEMENTS.searchBar.offsetWidth}px`;
     }
 }
+
+// 等待页面加载完成后再初始化
+window.addEventListener('load', async () => {
+    try {
+        await initializeConfig();
+        console.log('CONFIG initialized:', CONFIG);
+        console.log('supabaseClient initialized:', supabaseClient);
+    } catch (error) {
+        console.error('程序启动失败:', error);
+    }
+});
 
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
