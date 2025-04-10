@@ -503,11 +503,14 @@ button.ghost:focus {
 @media screen and (max-width: 768px) {
     .auth-container {
         flex-direction: column;
-        overflow-y: auto;
-        overflow-x: hidden;
     }
 
-    .form-container {
+    .form-container,
+    .sign-in-container,
+    .sign-up-container,
+    .overlay-container,
+    .overlay-panel,
+    .overlay {
         position: static !important;
         width: 100% !important;
         height: auto !important;
@@ -518,39 +521,25 @@ button.ghost:focus {
     }
 
     .overlay-container {
-        display: none !important;
+        display: none; /* 也可以保留，根据你需求决定 */
     }
 
-    .sign-in-container,
-    .sign-up-container {
-        display: none;
+    .auth-container.right-panel-active .sign-in-container,
+    .auth-container.right-panel-active .sign-up-container {
+        transform: none;
     }
 
-    .sign-in-container.active,
-    .sign-up-container.active {
-        display: block;
+    .form-container form {
+        padding: 20px;
     }
 
-    .mobile-toggle-buttons {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        gap: 10px;
-    }
-
-    .mobile-toggle-buttons button {
-        padding: 10px 20px;
-        border: 1px solid #00ffad;
-        background: #051015;
-        color: white;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .mobile-toggle-buttons button:hover {
-        background: rgba(0, 255, 173, 0.2);
+    .auth-container.right-panel-active .overlay,
+    .auth-container.right-panel-active .overlay-left,
+    .auth-container.right-panel-active .overlay-right {
+        transform: none;
     }
 }
+
 
 /* ================= Social ================= */
 
