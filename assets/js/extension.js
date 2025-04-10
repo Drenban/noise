@@ -3,7 +3,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         const quant = document.querySelector(".quant");
         const quantIntro = document.querySelector(".quant__intro"); // 添加选择
-        const minimizeBtn = document.querySelector(".button-icon.quant__intro--minimize");
+        const minimizeBtn = document.querySelector(".button-icon .quant__intro--minimize");
 
         const isMobile = window.matchMedia('(max-width: 1000px)').matches;
         if (!isMobile) return;
