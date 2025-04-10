@@ -3091,3 +3091,12 @@ li.CodeMirror-hint-active {
         fill:#c3c3c3
     }
 }
+
+@media (max-width: 1000px) {
+  .quant {
+      left: 0 !important;
+      width: 100% !important;
+      opacity: 1;
+      pointer-events: auto;
+  }
+}
