@@ -22,7 +22,7 @@ async function decryptSupabaseConfig() {
         window.SUPABASE_CONFIG = JSON.parse(decryptedText);
         return window.SUPABASE_CONFIG;
     } catch (error) {
-        console.error('解密 supabase-config.json 失败:', error);
+        console.error('Decryption of supabase-config.json failed:', error);
         return null;
     }
 }
@@ -67,7 +67,7 @@ async function loadDataFile(filePath) {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
-        console.error(`加载文件 ${filePath} 失败:`, error);
+        console.error(`Failed to load file ${filePath}:`, error);
         return null;
     }
 }
@@ -220,7 +220,7 @@ const dataLoader = {
 
     async loadUserData(username) {
         if (!CONFIG) {
-            console.error('CONFIG 未初始化，无法加载用户数据');
+            console.error('CONFIG is not initialized, unable to load user data.');
             return null;
         }
         try {
@@ -470,7 +470,7 @@ const PeekXAuth = {
         const password = utils.sanitizeInput(document.querySelector('.sign-in-container input[type="password"]').value.trim());
 
         if (!CONFIG || !supabaseClient) {
-            console.error('CONFIG 或 supabaseClient 未初始化，跳过 Supabase 登录');
+            console.error('CONFIG or supabaseClient is not initialized, skip Supabase login');
         } else {
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -623,7 +623,7 @@ window.addEventListener('load', async () => {
     try {
         await initializeConfig();
     } catch (error) {
-        console.error('程序启动失败:', error);
+        console.error('Program startup failed:', error);
     }
 });
 
