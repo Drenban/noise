@@ -500,46 +500,70 @@ button.ghost:focus {
     transform: translateX(20%);
 }
 
-@media screen and (max-width: 768px) {
+@media (max-width: 1000px) {
+    /* 调整主容器为垂直布局 */
     .auth-container {
+        position: relative;
+        height: auto; /* 允许内容撑开高度 */
+        overflow-y: auto; /* 启用垂直滚动 */
+        display: flex;
         flex-direction: column;
     }
 
-    .form-container,
+    /* 表单容器改为上下排列 */
+    .form-container {
+        position: static; /* 移除绝对定位 */
+        width: 100%; /* 占满宽度 */
+        height: auto; /* 自适应内容 */
+        transition: none; /* 移除左右动画 */
+    }
+
     .sign-in-container,
-    .sign-up-container,
-    .overlay-container,
-    .overlay-panel,
-    .overlay {
-        position: static !important;
-        width: 100% !important;
-        height: auto !important;
-        transform: none !important;
-        opacity: 1 !important;
-        z-index: auto !important;
-        transition: none !important;
+    .sign-up-container {
+        transform: none; /* 移除横向移动 */
+        opacity: 1; /* 始终可见 */
+        z-index: 1; /* 重置层级 */
+        padding: 20px 50px; /* 调整内边距 */
     }
 
+    /* 隐藏 overlay-container，改为导航按钮 */
     .overlay-container {
-        display: none; /* 也可以保留，根据你需求决定 */
+        display: none; /* 在手机端隐藏侧边面板 */
     }
 
+    /* 添加导航按钮样式 */
+    .auth-container::before,
+    .auth-container::after {
+        content: "";
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background: #051015;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 1px solid #51585b;
+    }
+
+    .auth-container::before {
+        content: "Sign In";
+    }
+
+    .auth-container::after {
+        content: "Sign Up";
+    }
+
+    /* 移除 right-panel-active 的效果 */
     .auth-container.right-panel-active .sign-in-container,
-    .auth-container.right-panel-active .sign-up-container {
+    .auth-container.right-panel-active .sign-up-container,
+    .auth-container.right-panel-active .overlay-container,
+    .auth-container.right-panel-active .overlay {
         transform: none;
-    }
-
-    .form-container form {
-        padding: 20px;
-    }
-
-    .auth-container.right-panel-active .overlay,
-    .auth-container.right-panel-active .overlay-left,
-    .auth-container.right-panel-active .overlay-right {
-        transform: none;
+        opacity: 1;
     }
 }
-
 
 /* ================= Social ================= */
 
