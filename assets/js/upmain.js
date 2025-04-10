@@ -681,6 +681,8 @@ window.addEventListener('load', async () => {
         await initializeConfig();
         console.log('CONFIG initialized:', CONFIG);
         console.log('supabaseClient initialized:', supabaseClient);
+        await postLogin();
+        console.log('Program started successfully');
     } catch (error) {
         console.error('程序启动失败:', error);
     }
