@@ -589,3 +589,30 @@ social a:active {
     opacity: 1;
     transform: scale(1.1);
 }
+
+/* ================= mobile ================= */
+
+@media (max-width: 1000px) {
+  .quant {
+      left: 0 !important;
+      width: 100% !important;
+  }
+}
+
+@media (max-width: 1000px) {
+    .quant__intro {
+        max-height: 2em;
+        transition: max-height 0.3s ease;
+    }
+    .quant__intro.is-expanded {
+        max-height: 500px;
+    }
+    .quant__intro:not(.is-minimized) {
+        max-height: 2em;
+    }
+    .quant__intro--minimize {
+        pointer-events: auto !important;
+        cursor: pointer;
+        z-index: 1;
+    }
+}
