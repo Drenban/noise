@@ -596,10 +596,12 @@ social a:active {
     .quant {
         left: 0 !important;
         width: 100% !important;
+        height: 100% !important;
     }
     .quant__tabs,
     .quant__buttons,
-    .quant__controls {
+    .quant__controls,
+    #shader-quant-cm {
         display: none;
         height: 0;
         overflow: hidden;
