@@ -113,6 +113,9 @@ async function loadDataFile(filePath) {
 }
 
 async function initializeConfig() {
+    if (!window.Supabase?.createClient) {
+        throw new Error('Supabase library not loaded');
+    }
     try {
         console.log('Starting CONFIG initialization...');
         await decryptSupabaseConfig();
@@ -564,7 +567,17 @@ const PeekXAuth = {
         alert('Login successful (JSON)');
     },
     postLogin() {
-        console.log('Post-login logic here');
+        if (!CONFIG) {
+            console.error('CONFIG 未初始化，跳过 postLogin');
+            ELEMENTS.container.classList.remove('hidden');
+            ELEMENTS.searchPage.classList.remove('is-active');
+            return;
+        }
+        sessionStorage.setItem('isLoggedIn', 'true');
+        ELEMENTS.container.classList.add('hidden');
+        ELEMENTS.searchPage.classList.add('is-active');
+        dataLoader.loadJSONData();
+        dataLoader.loadCorpus();
     },
 
     async register(event) {
@@ -644,6 +657,16 @@ const PeekXAuth = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 先初始化 CONFIG
+    try {
+        await initializeConfig();
+        console.log('CONFIG initialized early in DOMContentLoaded');
+    } catch (error) {
+        console.error('Early CONFIG initialization failed:', error);
+        ELEMENTS.container.classList.remove('hidden'); // 显示登录界面
+        return;
+    }
+    
     ELEMENTS.signUpButton.addEventListener('click', () => ELEMENTS.container.classList.add('right-panel-active'));
     ELEMENTS.signInButton.addEventListener('click', () => ELEMENTS.container.classList.remove('right-panel-active'));
     ELEMENTS.historyButton.addEventListener('click', () => ELEMENTS.searchHistory.classList.toggle('visible'));
@@ -675,18 +698,18 @@ function adjustResultsWidth() {
     }
 }
 
-// 等待页面加载完成后再初始化
-window.addEventListener('load', async () => {
-    try {
-        await initializeConfig();
-        console.log('CONFIG initialized:', CONFIG);
-        console.log('supabaseClient initialized:', supabaseClient);
-        await postLogin();
-        console.log('Program started successfully');
-    } catch (error) {
-        console.error('程序启动失败:', error);
-    }
-});
+// // 等待页面加载完成后再初始化
+// window.addEventListener('load', async () => {
+//     try {
+//         await initializeConfig();
+//         console.log('CONFIG initialized:', CONFIG);
+//         console.log('supabaseClient initialized:', supabaseClient);
+//         await postLogin();
+//         console.log('Program started successfully');
+//     } catch (error) {
+//         console.error('程序启动失败:', error);
+//     }
+// });
 
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
