@@ -3096,7 +3096,6 @@ li.CodeMirror-hint-active {
   .quant {
       left: 0 !important;
       width: 100% !important;
-      opacity: 1;
       pointer-events: auto;
   }
 }
