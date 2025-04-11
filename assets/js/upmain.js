@@ -81,64 +81,64 @@ async function loadDataFile(filePath) {
     }
 }
 
-// async function initializeConfig() {
-//     try {
-//         await decryptSupabaseConfig();
-//         const result = await loadConfig();
-//         if (!result) throw new Error('Failed to initialize CONFIG');
-//         CONFIG = result;
-//         supabaseClient = result.supabase;
-//     } catch (error) {
-//         console.error('initializeConfig failed:', error);
-//         throw error;
+async function initializeConfig() {
+    try {
+        await decryptSupabaseConfig();
+        const result = await loadConfig();
+        if (!result) throw new Error('Failed to initialize CONFIG');
+        CONFIG = result;
+        supabaseClient = result.supabase;
+    } catch (error) {
+        console.error('initializeConfig failed:', error);
+        throw error;
+    }
+}
+
+// async function withRetry(fn, retries = 3, delay = 1000) {
+//     for (let i = 0; i < retries; i++) {
+//         try {
+//             return await fn();
+//         } catch (error) {
+//             if (i === retries - 1) throw error;
+//             console.warn(`[CONFIG] Retry ${i + 1}/${retries} after ${delay}ms:`, error.message);
+//             await new Promise(resolve => setTimeout(resolve, delay));
+//         }
 //     }
 // }
 
-async function withRetry(fn, retries = 3, delay = 1000) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            return await fn();
-        } catch (error) {
-            if (i === retries - 1) throw error;
-            console.warn(`[CONFIG] Retry ${i + 1}/${retries} after ${delay}ms:`, error.message);
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-    }
-}
+// async function initializeConfig() {
+//     try {
+//         console.log('[CONFIG] Decrypting config...');
+//         const supabaseConfig = await withRetry(decryptSupabaseConfig);
+//         if (!supabaseConfig) throw new Error('decryptSupabaseConfig returned null');
 
-async function initializeConfig() {
-    try {
-        console.log('[CONFIG] Decrypting config...');
-        const supabaseConfig = await withRetry(decryptSupabaseConfig);
-        if (!supabaseConfig) throw new Error('decryptSupabaseConfig returned null');
+//         console.log('[CONFIG] Loading config...');
+//         const result = await withRetry(loadConfig);
+//         if (!result) throw new Error('loadConfig returned null or undefined');
 
-        console.log('[CONFIG] Loading config...');
-        const result = await withRetry(loadConfig);
-        if (!result) throw new Error('loadConfig returned null or undefined');
+//         CONFIG = { ...DEFAULT_CONFIG, ...result };
+//         supabaseClient = CONFIG.supabase;
 
-        CONFIG = { ...DEFAULT_CONFIG, ...result };
-        supabaseClient = CONFIG.supabase;
+//         console.log('[CONFIG] Initialization successful:', CONFIG);
+//     } catch (error) {
+//         console.error('[CONFIG] Initialization failed:', error);
 
-        console.log('[CONFIG] Initialization successful:', CONFIG);
-    } catch (error) {
-        console.error('[CONFIG] Initialization failed:', error);
+//         CONFIG = { ...DEFAULT_CONFIG };
+//         supabaseClient = null;
 
-        CONFIG = { ...DEFAULT_CONFIG };
-        supabaseClient = null;
+//         try {
+//             const jsonCheck = await fetch(CONFIG.JSON_DATA_PATH);
+//             const corpusCheck = await fetch(CONFIG.CORPUS_PATH);
+//             if (!jsonCheck.ok || !corpusCheck.ok) {
+//                 console.warn('[CONFIG] Default paths may be invalid:', CONFIG.JSON_DATA_PATH, CONFIG.CORPUS_PATH);
+//             }
+//         } catch (fetchError) {
+//             console.warn('[CONFIG] Default paths unavailable:', fetchError.message);
+//         }
 
-        try {
-            const jsonCheck = await fetch(CONFIG.JSON_DATA_PATH);
-            const corpusCheck = await fetch(CONFIG.CORPUS_PATH);
-            if (!jsonCheck.ok || !corpusCheck.ok) {
-                console.warn('[CONFIG] Default paths may be invalid:', CONFIG.JSON_DATA_PATH, CONFIG.CORPUS_PATH);
-            }
-        } catch (fetchError) {
-            console.warn('[CONFIG] Default paths unavailable:', fetchError.message);
-        }
-
-        console.warn('[CONFIG] Using fallback default configuration:', CONFIG);
-    }
-}
+//         console.warn('[CONFIG] Using fallback default configuration:', CONFIG);
+//     }
+// }
 
 const ELEMENTS = {
     signUpButton: document.getElementById('signUp'),
@@ -241,7 +241,7 @@ const utils = {
 const dataLoader = {
     async loadJSONData() {
         try {
-            const response = await fetch(CONFIG.JSON_DATA_PATH);
+            const response = await fetch('/noise/assets/data/data.json');
             if (!response.ok) throw new Error('Failed to load JSON data');
             state.workbookData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
         } catch (error) {
@@ -252,7 +252,7 @@ const dataLoader = {
 
     async loadCorpus() {
         try {
-            const response = await fetch(CONFIG.CORPUS_PATH);
+            const response = await fetch('/noise/assets/data/corpus.json');
             if (!response.ok) throw new Error(`Failed to load corpus: ${response.status}`);
             state.corpus = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             state.fuse = new Fuse(state.corpus, {
@@ -279,7 +279,7 @@ const dataLoader = {
             return null;
         }
         try {
-            const response = await fetch(`${CONFIG.USER_DATA_PATH}${username}.json`);
+            const response = await fetch(`${'/noise/assets/obfuscate/'}${username}.json`);
             if (response.status === 404) return null;
             if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
             state.userData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
