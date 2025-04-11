@@ -195,7 +195,7 @@ const utils = {
 
     generateToken(username) {
         const salt = crypto.randomUUID();
-        const payload = { username, exp: Date.now() + CONFIG.TOKEN_EXPIRY_MS, salt };
+        const payload = { username, exp: Date.now() + DEFAULT_CONFIG.TOKEN_EXPIRY_MS, salt };
         localStorage.setItem('salt', salt);
         return btoa(JSON.stringify(payload));
     },
@@ -241,7 +241,7 @@ const utils = {
 const dataLoader = {
     async loadJSONData() {
         try {
-            const response = await fetch('/noise/assets/data/data.json');
+            const response = await fetch(DEFAULT_CONFIG.JSON_DATA_PATH);
             if (!response.ok) throw new Error('Failed to load JSON data');
             state.workbookData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
         } catch (error) {
@@ -252,7 +252,7 @@ const dataLoader = {
 
     async loadCorpus() {
         try {
-            const response = await fetch('/noise/assets/data/corpus.json');
+            const response = await fetch(DEFAULT_CONFIG.CORPUS_PATH);
             if (!response.ok) throw new Error(`Failed to load corpus: ${response.status}`);
             state.corpus = JSON.parse(utils.decodeBase64UTF8(await response.text()));
             state.fuse = new Fuse(state.corpus, {
@@ -279,7 +279,7 @@ const dataLoader = {
             return null;
         }
         try {
-            const response = await fetch(`${'/noise/assets/obfuscate/'}${username}.json`);
+            const response = await fetch(`${DEFAULT_CONFIG.USER_DATA_PATH}${username}.json`);
             if (response.status === 404) return null;
             if (!response.ok) throw new Error(`Failed to fetch user data for ${username}`);
             state.userData = JSON.parse(utils.decodeBase64UTF8(await response.text()));
