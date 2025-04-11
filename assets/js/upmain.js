@@ -629,4 +629,3 @@ window.addEventListener('load', async () => {
 
 window.PeekXAuth = PeekXAuth;
 window.handleLogout = PeekXAuth.logout;
-window.decryptSupabaseConfig = decryptSupabaseConfig;
