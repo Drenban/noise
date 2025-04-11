@@ -405,7 +405,7 @@ const search = {
         const intent = this.detectIntent(query);
         const answer = this.generateResponse(intent, bestMatch);
 
-        if (state.searchCache.size >= CONFIG.CACHE_LIMIT) state.searchCache.clear();
+        if (state.searchCache.size >= DEFAULT_CONFIG.CACHE_LIMIT) state.searchCache.clear();
         state.searchCache.set(query, answer);
         return answer;
     },
@@ -505,7 +505,7 @@ const search = {
     },
     
     updateHistory() {
-        ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, CONFIG.MAX_HISTORY)
+        ELEMENTS.historyList.innerHTML = state.searchHistory.slice(0, DEFAULT_CONFIG.MAX_HISTORY)
             .map(item => `<li>${item}</li>`).join('');
         ELEMENTS.historyList.querySelectorAll('li').forEach(li => {
             li.addEventListener('click', () => {
