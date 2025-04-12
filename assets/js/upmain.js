@@ -410,28 +410,34 @@ const search = {
     //     return answer;
     // },
     
-    async corpus(query) {
-        if (!this.state.corpus || !this.state.fuse) return 'Corpus not loaded, please try again later';
-        query = query.trim().toLowerCase();
-        if (this.state.searchCache.has(query)) return this.state.searchCache.get(query);
-
-        const results = this.state.fuse.search(query);
+    corpus(query) {
+        if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
+        query = query ? query.trim().toLowerCase() : '';
+        if (!query) return 'Query cannot be empty';
+        if (state.searchCache.has(query)) return state.searchCache.get(query);
+    
+        const results = state.fuse.search(query);
         const bestMatch = results.length && results[0].score < 0.6 ? results[0] : null;
         const intent = this.detectIntent(query);
-
+    
         // 调用 MiniMind API
-        const apiUrl = 'http://localhost:5000/chat';  // NovaX API 地址
-        const prompt = bestMatch ? `基于以下内容回答：${bestMatch.item.text}\n问题：${query}` : query;
+        const apiUrl = window.API_URL || 'http://localhost:5000/chat'; // 支持配置
+        // 假设 corpus.json 使用 question 字段
+        const prompt = bestMatch ? `基于以下内容回答：${bestMatch.item.question}\n问题：${query}` : query;
         try {
             const response = await axios.post(apiUrl, { query: prompt });
-            const answer = response.data.response;
-
-            if (this.state.searchCache.size >= DEFAULT_CONFIG.CACHE_LIMIT) this.state.searchCache.clear();
-            this.state.searchCache.set(query, answer);
+            const answer = response.data.response || 'No response from server';
+    
+            // LRU 缓存
+            if (state.searchCache.size >= DEFAULT_CONFIG.CACHE_LIMIT) {
+                const oldestKey = state.searchCache.keys().next().value;
+                state.searchCache.delete(oldestKey);
+            }
+            state.searchCache.set(query, answer);
             return answer;
         } catch (error) {
-            console.error('API call failed:', error);
-            return 'Sorry, something went wrong.';
+            console.error('API call failed:', error.message);
+            return error.code === 'ECONNREFUSED' ? 'Server is not responding, please try again later' : 'Sorry, something went wrong.';
         }
     },
 
