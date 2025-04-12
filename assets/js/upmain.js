@@ -395,19 +395,48 @@ const search = {
         }
     },
     
-    corpus(query) {
-        if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
-        query = query.trim().toLowerCase();
-        if (state.searchCache.has(query)) return state.searchCache.get(query);
+    // corpus(query) {
+    //     if (!state.corpus || !state.fuse) return 'Corpus not loaded, please try again later';
+    //     query = query.trim().toLowerCase();
+    //     if (state.searchCache.has(query)) return state.searchCache.get(query);
 
-        const results = state.fuse.search(query);
+    //     const results = state.fuse.search(query);
+    //     const bestMatch = results.length && results[0].score < 0.6 ? results[0] : null;
+    //     const intent = this.detectIntent(query);
+    //     const answer = this.generateResponse(intent, bestMatch);
+
+    //     if (state.searchCache.size >= DEFAULT_CONFIG.CACHE_LIMIT) state.searchCache.clear();
+    //     state.searchCache.set(query, answer);
+    //     return answer;
+    // },
+    const Fuse = require('fuse.js');
+    const axios = require('axios');
+    
+    const DEFAULT_CONFIG = { CACHE_LIMIT: 1000 };
+    
+    async corpus(query) {
+        if (!this.state.corpus || !this.state.fuse) return 'Corpus not loaded, please try again later';
+        query = query.trim().toLowerCase();
+        if (this.state.searchCache.has(query)) return this.state.searchCache.get(query);
+
+        const results = this.state.fuse.search(query);
         const bestMatch = results.length && results[0].score < 0.6 ? results[0] : null;
         const intent = this.detectIntent(query);
-        const answer = this.generateResponse(intent, bestMatch);
 
-        if (state.searchCache.size >= DEFAULT_CONFIG.CACHE_LIMIT) state.searchCache.clear();
-        state.searchCache.set(query, answer);
-        return answer;
+        // 调用 MiniMind API
+        const apiUrl = 'http://localhost:5000/chat';  // NovaX API 地址
+        const prompt = bestMatch ? `基于以下内容回答：${bestMatch.item.text}\n问题：${query}` : query;
+        try {
+            const response = await axios.post(apiUrl, { query: prompt });
+            const answer = response.data.response;
+
+            if (this.state.searchCache.size >= DEFAULT_CONFIG.CACHE_LIMIT) this.state.searchCache.clear();
+            this.state.searchCache.set(query, answer);
+            return answer;
+        } catch (error) {
+            console.error('API call failed:', error);
+            return 'Sorry, something went wrong.';
+        }
     },
 
     detectIntent(input) {
