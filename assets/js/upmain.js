@@ -292,6 +292,109 @@ const dataLoader = {
 };
 
 const search = {
+    // json(query) {
+    //     if (!state.workbookData) {
+    //         ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
+    //         return null;
+    //     }
+    
+    //     const conditions = {};
+    //     let isSimpleQuery = false;
+    //     let name, age;
+    //     query = query.trim().toLowerCase();
+    
+    //     if (query.includes(':')) {
+    //         query.split(',').forEach(part => {
+    //             const [key, value] = part.split(':').map(s => s.trim());
+    //             if (key && value !== undefined) {
+    //                 conditions[key] = value;
+    //             }
+    //         });
+    //         name = conditions['celv'] || conditions['策略'];
+    //         age = conditions['shoupanjia'] || conditions['收盘价'];
+    //         if (name && age && Object.keys(conditions).length === 2) {
+    //             isSimpleQuery = true;
+    //         }
+    //     }
+    //     else if (/[，, ]/.test(query)) {
+    //         const parts = query.split(/[，, ]+/).map(s => s.trim());
+    //         if (parts.length === 2) {
+    //             isSimpleQuery = true;
+    //             [age, name] = /^\d+$/.test(parts[0]) ? [parts[0], parts[1]] : [parts[1], parts[0]];
+    //             conditions['策略'] = name;
+    //             conditions['收盘价'] = age;
+    //         }
+    //     }
+    //     else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+    //         isSimpleQuery = true;
+    //         if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+    //             age = query.match(/\d+/)[0];
+    //             name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+    //         } else {
+    //             name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+    //             age = query.match(/\d+/)[0];
+    //         }
+    //         conditions['策略'] = name;
+    //         conditions['收盘价'] = age;
+    //     }
+    //     else if (/^\d+$/.test(query)) {
+    //         conditions['股票代码'] = query;
+    //     }
+    //     else {
+    //         conditions[''] = query;
+    //     }
+    
+    //     const matches = state.workbookData.filter(row => {
+    //         if (conditions['']) {
+    //             const result = Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
+    //             return result;
+    //         }
+    //         const result = Object.entries(conditions).every(([key, value]) => {
+    //             const rowValue = String(row[key] || '').toLowerCase();
+    //             if (!value) return true;
+    //             if (value.includes('-')) {
+    //                 const [min, max] = value.split('-').map(Number);
+    //                 const numValue = Math.floor(Number(rowValue));
+    //                 return numValue >= min && numValue <= max;
+    //             }
+    //             if (value.startsWith('>')) {
+    //                 const compare = Math.floor(Number(rowValue)) > Number(value.slice(1));
+    //                 return compare;
+    //             }
+    //             if (value.startsWith('<')) {
+    //                 const compare = Math.floor(Number(rowValue)) < Number(value.slice(1));
+    //                 return compare;
+    //             }
+    //             if (key.toLowerCase() === '收盘价') {
+    //                 const compare = Math.floor(Number(rowValue)) === Math.floor(Number(value));
+    //                 return compare;
+    //             }
+    //             const compare = rowValue === value;
+    //             return compare;
+    //         });
+    //         return result;
+    //     });
+    
+    //     if (!matches.length) {
+    //         return null;
+    //     }
+    
+    //     if (isSimpleQuery) {
+    //         const codes = matches.map(row => row['股票代码']).filter(Boolean).join(', ');
+    //         const result = [
+    //             `<span class="field">全部代码:</span><br><span class="value">${codes}</span>`,
+    //             `<span class="field">合计:</span> <span class="value">${matches.length}</span>`
+    //         ];
+    //         return result;
+    //     } else {
+    //         const result = matches.flatMap((result, index) => [
+    //             ...Object.entries(result).map(([key, value]) => `<span class="field">${key}:</span> <span class="value">${value}</span>`),
+    //             ...(index < matches.length - 1 ? ['<hr>'] : [])
+    //         ]);
+    //         return result;
+    //     }
+    // },
+
     json(query) {
         if (!state.workbookData) {
             ELEMENTS.resultsList.innerHTML = '<li>Server busy, please try again later</li>';
@@ -300,79 +403,85 @@ const search = {
     
         const conditions = {};
         let isSimpleQuery = false;
-        let name, age;
+        let strategy, price;
         query = query.trim().toLowerCase();
     
+        // 解析输入
         if (query.includes(':')) {
+            // 键值对：如 "策略:买入,收盘价:20"
             query.split(',').forEach(part => {
                 const [key, value] = part.split(':').map(s => s.trim());
                 if (key && value !== undefined) {
                     conditions[key] = value;
                 }
             });
-            name = conditions['celv'] || conditions['策略'];
-            age = conditions['shoupanjia'] || conditions['收盘价'];
-            if (name && age && Object.keys(conditions).length === 2) {
+            strategy = conditions['celv'] || conditions['策略'];
+            price = conditions['shoupanjia'] || conditions['收盘价'];
+            if (strategy && price) {
                 isSimpleQuery = true;
+                conditions['策略'] = strategy;
+                conditions['收盘价'] = price;
             }
-        }
-        else if (/[，, ]/.test(query)) {
+        } else if (/[，, ]/.test(query)) {
+            // 逗号/空格分隔：如 "买入 20" 或 "20,买入"
             const parts = query.split(/[，, ]+/).map(s => s.trim());
             if (parts.length === 2) {
                 isSimpleQuery = true;
-                [age, name] = /^\d+$/.test(parts[0]) ? [parts[0], parts[1]] : [parts[1], parts[0]];
-                conditions['策略'] = name;
-                conditions['收盘价'] = age;
+                if (/^\d+(\.\d+)?$/.test(parts[0])) {
+                    [price, strategy] = parts;
+                } else {
+                    [strategy, price] = parts;
+                }
+                conditions['策略'] = strategy;
+                conditions['收盘价'] = price;
             }
-        }
-        else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+$/.test(query) || /^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+        } else if (/^[\u4e00-\u9fa5a-zA-Z]+\d+(\.\d+)?$/.test(query) || /^\d+(\.\d+)?[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+            // 连写：如 "买入20.5" 或 "20.5买入"
             isSimpleQuery = true;
-            if (/^\d+[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
-                age = query.match(/\d+/)[0];
-                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+            if (/^\d+(\.\d+)?[\u4e00-\u9fa5a-zA-Z]+$/.test(query)) {
+                price = query.match(/\d+(\.\d+)?/)[0];
+                strategy = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
             } else {
-                name = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
-                age = query.match(/\d+/)[0];
+                strategy = query.match(/[\u4e00-\u9fa5a-zA-Z]+/)[0];
+                price = query.match(/\d+(\.\d+)?/)[0];
             }
-            conditions['策略'] = name;
-            conditions['收盘价'] = age;
-        }
-        else if (/^\d+$/.test(query)) {
+            conditions['策略'] = strategy;
+            conditions['收盘价'] = price;
+        } else if (/^\d+$/.test(query)) {
+            // 纯数字：股票代码
             conditions['股票代码'] = query;
-        }
-        else {
+        } else {
+            // 模糊搜索
             conditions[''] = query;
         }
     
+        // 过滤数据
         const matches = state.workbookData.filter(row => {
             if (conditions['']) {
-                const result = Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
-                return result;
+                return Object.values(row).some(val => String(val).toLowerCase().includes(conditions['']));
             }
-            const result = Object.entries(conditions).every(([key, value]) => {
+            return Object.entries(conditions).every(([key, value]) => {
                 const rowValue = String(row[key] || '').toLowerCase();
                 if (!value) return true;
+                if (key.toLowerCase() === '收盘价') {
+                    // 放宽价格匹配，允许 ±0.1 容差
+                    const rowPrice = Number(rowValue);
+                    const queryPrice = Number(value);
+                    return Math.abs(rowPrice - queryPrice) <= 0.1;
+                }
                 if (value.includes('-')) {
                     const [min, max] = value.split('-').map(Number);
-                    const numValue = Math.floor(Number(rowValue));
+                    const numValue = Number(rowValue);
                     return numValue >= min && numValue <= max;
                 }
                 if (value.startsWith('>')) {
-                    const compare = Math.floor(Number(rowValue)) > Number(value.slice(1));
-                    return compare;
+                    return Number(rowValue) > Number(value.slice(1));
                 }
                 if (value.startsWith('<')) {
-                    const compare = Math.floor(Number(rowValue)) < Number(value.slice(1));
-                    return compare;
+                    return Number(rowValue) < Number(value.slice(1));
                 }
-                if (key.toLowerCase() === '收盘价') {
-                    const compare = Math.floor(Number(rowValue)) === Math.floor(Number(value));
-                    return compare;
-                }
-                const compare = rowValue === value;
-                return compare;
+                return rowValue === value;
             });
-            return result;
         });
     
         if (!matches.length) {
