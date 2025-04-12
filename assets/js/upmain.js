@@ -409,10 +409,6 @@ const search = {
     //     state.searchCache.set(query, answer);
     //     return answer;
     // },
-    const Fuse = require('fuse.js');
-    const axios = require('axios');
-    
-    const DEFAULT_CONFIG = { CACHE_LIMIT: 1000 };
     
     async corpus(query) {
         if (!this.state.corpus || !this.state.fuse) return 'Corpus not loaded, please try again later';
