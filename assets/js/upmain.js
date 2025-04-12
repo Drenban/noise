@@ -467,7 +467,7 @@ const search = {
                     // 放宽价格匹配，允许 ±0.1 容差
                     const rowPrice = Number(rowValue);
                     const queryPrice = Number(value);
-                    return Math.abs(rowPrice - queryPrice) <= 0.1;
+                    return Math.abs(rowPrice - queryPrice) <= 0.5;
                 }
                 if (value.includes('-')) {
                     const [min, max] = value.split('-').map(Number);
