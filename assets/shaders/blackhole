@@ -8,6 +8,7 @@
     dean_the_coder: -12
     iq: -4
 */
+
 void mainImage(out vec4 O, vec2 F)
 {
     //Iterator and attenuation (distance-squared)
@@ -46,9 +47,8 @@ void mainImage(out vec4 O, vec2 F)
              );
     }
 
-
-
 //Original [432]
+
 /*
 void mainImage(out vec4 O,in vec2 F)
 {
