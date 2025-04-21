@@ -134,6 +134,27 @@ WebGL 是 Three.js 的底层技术，除非你想深入优化性能或做超定�
 
 如果跑通了，告诉我你的感觉！如果卡住了，贴出代码，我帮你 debug！😄
 
+xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy
+
+curl https://api.x.ai/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy" \
+  -d '{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a test assistant."
+    },
+    {
+      "role": "user",
+      "content": "Testing. Just say hi and hello world and nothing else."
+    }
+  ],
+  "model": "grok-3-latest",
+  "stream": false,
+  "temperature": 0
+}'
+
 ---
 
 ### 7. 关于订阅和“我” 😜
