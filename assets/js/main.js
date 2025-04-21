@@ -1,11 +1,8 @@
-const { OpenAI } = require("openai");
-require("dotenv").config();
-
-// xAI API client initialization
-const client = new OpenAI({
-    // apiKey: process.env.XAI_API_KEY,
-    apiKey: "xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy"
+// Initialize OpenAI client (browser-compatible)
+const client = new OpenAI.OpenAI({
+    apiKey: "xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy", // TODO: Replace with secure method (see notes)
     baseURL: "https://api.x.ai/v1",
+    dangerouslyAllowBrowser: true // Required for browser usage (not recommended for production)
 });
 
 const CONFIG = {
