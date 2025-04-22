@@ -266,13 +266,14 @@ const search = {
                         { role: 'system', content: '你是一个有帮助的助手。' },
                         { role: 'user', content: query }
                     ],
-                    stream: false
+                    stream: false,
+                    max_tokens: 200,
+                    temperature: 0.7
                 })
             });
     
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`HTTP 错误: ${response.status} ${response.statusText}, 详情: ${JSON.stringify(errorData)}`);
+                throw new Error(`HTTP 错误: ${response.status} ${response.statusText}`);
             }
     
             const data = await response.json();
@@ -290,7 +291,7 @@ const search = {
             return answer;
         } catch (error) {
             console.error("DeepSeek API 错误:", error.message);
-            ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>';
+            ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>`;
             return "查询失败";
         }
     },
