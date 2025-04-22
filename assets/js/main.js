@@ -254,14 +254,14 @@ const search = {
         }
     
         try {
-            const response = await fetch('https://api.x.ai/v1/chat/completions', {
+            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${CONFIG.XAI_API_KEY}`
+                    'Authorization': `Bearer ${CONFIG.DEEPSEEK_API_KEY}`
                 },
                 body: JSON.stringify({
-                    model: 'grok-3-latest',
+                    model: 'DeepSeek-R1',
                     messages: [
                         { role: 'system', content: '你是一个有帮助的助手。' },
                         { role: 'user', content: query }
@@ -290,7 +290,7 @@ const search = {
             search.updateHistory();
             return answer;
         } catch (error) {
-            console.error("xAI API 错误:", error.message);
+            console.error("DeepSeek API 错误:", error.message);
             ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>`;
             return "查询失败";
         }
