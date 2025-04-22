@@ -1,12 +1,3 @@
-// Initialize OpenAI client (browser-compatible)
-import OpenAI from "openai";
-
-const client = new OpenAI({
-    apiKey: "xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy", // TODO: Replace with secure method (see notes)
-    baseURL: "https://api.x.ai/v1",
-    dangerouslyAllowBrowser: true // Required for browser usage (not recommended for production)
-});
-
 const CONFIG = {
     SUPABASE_URL: 'https://xupnsfldgnmeicumtqpp.supabase.co',
     SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1cG5zZmxkZ25tZWljdW10cXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1Mjc1OTUsImV4cCI6MjA1NzEwMzU5NX0.hOHdx2iFHqA6LX2T-8xP4fWuYxK3HxZtTV2zjBHD3ro',
@@ -14,7 +5,8 @@ const CONFIG = {
     USER_DATA_PATH: '/noise/assets/obfuscate/',
     TOKEN_EXPIRY_MS: 3600000,
     MAX_HISTORY: 10,
-    CACHE_LIMIT: 100
+    CACHE_LIMIT: 100,
+    XAI_API_KEY: "xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy" // TODO: 替换为你的 xAI API 密钥
 };
 
 const ELEMENTS = {
@@ -246,51 +238,61 @@ const search = {
 
     async corpus(query) {
         if (!query || typeof query !== "string") {
-            return "Invalid query, please provide a valid string.";
+            ELEMENTS.resultsList.innerHTML = '<li>无效查询，请提供字符串</li>';
+            return "无效查询";
         }
         query = query.trim().toLowerCase();
         if (!query) {
-            return "Query is empty, please provide a valid input.";
+            ELEMENTS.resultsList.innerHTML = '<li>查询为空，请输入内容</li>';
+            return "查询为空";
         }
-
+    
         if (state.searchCache.has(query)) {
-            return state.searchCache.get(query);
+            const cached = state.searchCache.get(query);
+            ELEMENTS.resultsList.innerHTML = `<li>${cached}</li>`;
+            return cached;
         }
-
+    
         try {
-            const response = await client.chat.completions.create({
-                model: "grok-beta",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a helpful search assistant. Provide concise and accurate answers based on the user's query."
-                    },
-                    {
-                        role: "user",
-                        content: query
-                    }
-                ],
-                max_tokens: 200,
-                temperature: 0.7
+            const response = await fetch('https://api.x.ai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${CONFIG.XAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'grok-beta',
+                    messages: [
+                        { role: 'system', content: '你是一个有帮助的助手。' },
+                        { role: 'user', content: query }
+                    ],
+                    stream: false,
+                    max_tokens: 200,
+                    temperature: 0.7
+                })
             });
-
-            const answer = response.choices[0].message.content.trim();
-
+    
+            if (!response.ok) {
+                throw new Error(`HTTP 错误: ${response.status} ${response.statusText}`);
+            }
+    
+            const data = await response.json();
+            const answer = data.choices[0].message.content.trim();
             if (state.searchCache.size >= CONFIG.CACHE_LIMIT) {
                 state.searchCache.clear();
             }
             state.searchCache.set(query, answer);
-
+            ELEMENTS.resultsList.innerHTML = `<li>${answer}</li>`;
+            state.searchHistory.push(query);
+            if (state.searchHistory.length > CONFIG.MAX_HISTORY) {
+                state.searchHistory.shift();
+            }
+            search.updateHistory();
             return answer;
         } catch (error) {
-            console.error("API Error:", error.message);
-            if (error.status === 429) {
-                return "Rate limit exceeded, please try again later.";
-            } else if (error.status === 401) {
-                return "Authentication failed, please check your API key.";
-            } else {
-                return "An error occurred while processing your query, please try again.";
-            }
+            console.error("xAI API 错误:", error.message);
+            ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>`;
+            return "查询失败";
         }
     },
 
