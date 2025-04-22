@@ -267,7 +267,7 @@ const search = {
                         { role: 'user', content: query }
                     ],
                     stream: false,
-                    max_tokens: 200,
+                    max_tokens: 10000,
                     temperature: 0.7
                 })
             });
