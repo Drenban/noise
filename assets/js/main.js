@@ -1,4 +1,6 @@
 // Initialize OpenAI client (browser-compatible)
+import OpenAI from "openai";
+
 const client = new OpenAI.OpenAI({
     apiKey: "xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy", // TODO: Replace with secure method (see notes)
     baseURL: "https://api.x.ai/v1",
