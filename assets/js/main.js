@@ -261,7 +261,7 @@ const search = {
                     'Authorization': `Bearer ${CONFIG.XAI_API_KEY}`
                 },
                 body: JSON.stringify({
-                    model: 'grok-beta',
+                    model: 'grok-3-latest',
                     messages: [
                         { role: 'system', content: '你是一个有帮助的助手。' },
                         { role: 'user', content: query }
