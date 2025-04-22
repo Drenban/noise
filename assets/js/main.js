@@ -6,7 +6,7 @@ const CONFIG = {
     TOKEN_EXPIRY_MS: 3600000,
     MAX_HISTORY: 10,
     CACHE_LIMIT: 100,
-    XAI_API_KEY: "xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy" // TODO: 替换为你的 xAI API 密钥
+    DEEPSEEK_API_KEY: "sk-090e96bd6ae04f82abab84c32d9e381b" // TODO: 替换为你的 xAI API 密钥
 };
 
 const ELEMENTS = {
