@@ -134,6 +134,8 @@ WebGL 是 Three.js 的底层技术，除非你想深入优化性能或做超定�
 
 如果跑通了，告诉我你的感觉！如果卡住了，贴出代码，我帮你 debug！😄
 
+sk-090e96bd6ae04f82abab84c32d9e381b
+
 xai-UICjii8jGKPnvlJ2Ay3cfJsr6CEotRvwJaTTjlVuPZXcP3x0VGFoaygf4Eqets9UA6pjMC3QViXcvcsy
 
 curl https://api.x.ai/v1/chat/completions \
