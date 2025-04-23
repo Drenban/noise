@@ -249,51 +249,64 @@ const search = {
     
         if (state.searchCache.has(query)) {
             const cached = state.searchCache.get(query);
-            ELEMENTS.resultsList.innerHTML = `<li>${cached}</li>`;
+            ELEMENTS.resultsList.innerHTML = `<li>${escapeHTML(cached)}</li>`;
             return cached;
         }
     
         try {
-            const response = await fetch('https://api.deepseek.com/chat/completions', {
+            const response = await fetch('http://localhost:8000/v1/chat/completions', { // 云端用 http://47.100.XX.XX:8000
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${CONFIG.DEEPSEEK_API_KEY}`
+                    'Authorization': `Bearer ${CONFIG.MINIMIND_API_KEY}` // 若无需密钥，移除此行
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-chat',
+                    model: 'minimind-25.8M',
                     messages: [
                         { role: 'system', content: '你是一个有帮助的助手。' },
                         { role: 'user', content: query }
                     ],
                     stream: false,
-                    max_tokens: 1000,
-                    temperature: 0.7
+                    max_tokens: 1000
                 })
             });
     
             if (!response.ok) {
-                throw new Error(`HTTP 错误: ${response.status} ${response.statusText}`);
+                const errorData = await response.json();
+                throw new Error(`HTTP 错误: ${response.status} ${response.statusText}, 详情: ${JSON.stringify(errorData)}`);
             }
     
             const data = await response.json();
+            console.log('Token 使用:', data.usage);
             const answer = data.choices[0].message.content.trim();
             if (state.searchCache.size >= CONFIG.CACHE_LIMIT) {
                 state.searchCache.clear();
             }
             state.searchCache.set(query, answer);
-            ELEMENTS.resultsList.innerHTML = `<li>${answer}</li>`;
+            ELEMENTS.resultsList.innerHTML = `<li>${escapeHTML(answer)}</li>`;
             state.searchHistory.push(query);
             if (state.searchHistory.length > CONFIG.MAX_HISTORY) {
                 state.searchHistory.shift();
             }
             search.updateHistory();
+            localStorage.setItem('searchCache', JSON.stringify([...state.searchCache]));
+            localStorage.setItem('searchHistory', JSON.stringify(state.searchHistory));
             return answer;
         } catch (error) {
-            console.error("DeepSeek API 错误:", error.message);
+            console.error("MiniMind API 错误:", error.message);
             ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>`;
             return "查询失败";
         }
+    },
+    
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&apos;'
+        })[m]);
     },
 
     typeLines(lines, element) {
