@@ -236,6 +236,16 @@ const search = {
         }
     },
 
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&apos;'
+        })[m]);
+    },
+
     async corpus(query) {
         if (!query || typeof query !== "string") {
             ELEMENTS.resultsList.innerHTML = '<li>无效查询，请提供字符串</li>';
@@ -297,18 +307,8 @@ const search = {
             ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>`;
             return "查询失败";
         }
-    }
-    
-    function escapeHTML(str) {
-        return str.replace(/[&<>"']/g, m => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&apos;'
-        })[m]);
     },
-
+    
     typeLines(lines, element) {
         if (!element || !lines) return;
         if (state.isAnimating) return;
