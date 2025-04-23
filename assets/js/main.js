@@ -297,7 +297,7 @@ const search = {
             ELEMENTS.resultsList.innerHTML = `<li>查询失败：${error.message}</li>`;
             return "查询失败";
         }
-    },
+    }
     
     function escapeHTML(str) {
         return str.replace(/[&<>"']/g, m => ({
